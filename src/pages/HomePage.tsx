@@ -4,6 +4,7 @@ import { useAuth } from '../contexts/AuthContext';
 import { RootState, AppDispatch } from '../store/store';
 import { fetchJobs } from '../store/slices/jobsSlice';
 import { fetchProducts } from '../store/slices/productsSlice';
+import { getRolePermissions, getRoleDisplayName } from '../utils/roleUtils';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import {
   faBriefcase,
@@ -14,7 +15,10 @@ import {
   faSearch,
   faMapMarkerAlt,
   faClock,
-  faStar
+  faStar,
+  faTachometerAlt,
+  faShoppingCart,
+  faUserTie
 } from '@fortawesome/free-solid-svg-icons';
 import styled from 'styled-components';
 import { Link } from 'react-router-dom';
@@ -230,6 +234,7 @@ const HomePage: React.FC = () => {
   const { user } = useAuth();
   const { jobs, stats: jobStats } = useSelector((state: RootState) => state.jobs);
   const { products, stats: productStats } = useSelector((state: RootState) => state.products);
+  const permissions = getRolePermissions(user);
 
   useEffect(() => {
     dispatch(fetchJobs());
@@ -239,6 +244,7 @@ const HomePage: React.FC = () => {
   const recentJobs = jobs.slice(0, 3);
   const recentProducts = products.slice(0, 3);
 
+  // Common actions - everyone can access
   const commonActions = [
     {
       to: '/jobs',
@@ -256,37 +262,58 @@ const HomePage: React.FC = () => {
     }
   ];
 
-  const userActions = user?.isAgent ? [
-    {
-      to: '/create-worker',
-      icon: faUsers,
-      title: 'Create Worker',
-      description: 'Add new worker profiles',
-      color: '#1976D2'
-    },
-    {
-      to: '/agent-dashboard',
-      icon: faUsers,
-      title: 'Manage Workers',
-      description: 'View and manage worker profiles',
-      color: '#FF9800'
+  // Role-based actions
+  const getRoleBasedActions = () => {
+    const actions = [];
+
+    // Job posting - only employers
+    if (permissions.canPostJobs) {
+      actions.push({
+        to: '/post-job',
+        icon: faPlus,
+        title: 'Post Job',
+        description: 'Create new job opportunities',
+        color: '#1976D2'
+      });
     }
-  ] : [
-    {
-      to: '/post-job',
-      icon: faPlus,
-      title: 'Post Job',
-      description: 'Post a new job opportunity',
-      color: '#1976D2'
-    },
-    {
-      to: '/sell-product',
-      icon: faHammer,
-      title: 'Sell Product',
-      description: 'List your agricultural products',
-      color: '#4CAF50'
+
+    // Product posting - only farmers
+    if (permissions.canPostProducts) {
+      actions.push({
+        to: '/sell-product',
+        icon: faHammer,
+        title: 'Sell Product',
+        description: 'List your agricultural products',
+        color: '#4CAF50'
+      });
     }
-  ];
+
+    // Worker creation - only agents
+    if (permissions.canCreateWorkers) {
+      actions.push({
+        to: '/create-worker',
+        icon: faUsers,
+        title: 'Create Worker',
+        description: 'Add new worker profiles',
+        color: '#1976D2'
+      });
+    }
+
+    // Agent dashboard - only agents
+    if (permissions.canViewAnalytics) {
+      actions.push({
+        to: '/agent-dashboard',
+        icon: faTachometerAlt,
+        title: 'Agent Dashboard',
+        description: 'Manage workers and view analytics',
+        color: '#FF9800'
+      });
+    }
+
+    return actions;
+  };
+
+  const roleBasedActions = getRoleBasedActions();
 
   return (
     <HomeContainer>
@@ -298,6 +325,12 @@ const HomePage: React.FC = () => {
             : 'What would you like to do today?'
           }
         </WelcomeSubtitle>
+        {user?.primaryRole && (
+          <AgentBadge>
+            <FontAwesomeIcon icon={faUserTie} />
+            {getRoleDisplayName(user.primaryRole as any)} Account
+          </AgentBadge>
+        )}
         {user?.isAgent && (
           <AgentBadge>
             <FontAwesomeIcon icon={faUsers} />
@@ -318,7 +351,7 @@ const HomePage: React.FC = () => {
               <ActionDescription>{action.description}</ActionDescription>
             </ActionCard>
           ))}
-          {userActions.map((action) => (
+          {roleBasedActions.map((action) => (
             <ActionCard key={action.to} to={action.to}>
               <ActionIcon color={action.color}>
                 <FontAwesomeIcon icon={action.icon} />

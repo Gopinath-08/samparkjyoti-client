@@ -1,0 +1,142 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Backend Test</title>
+    <style>
+        body { font-family: Arial, sans-serif; margin: 20px; }
+        .test-section { margin: 20px 0; padding: 15px; border: 1px solid #ccc; border-radius: 5px; }
+        .success { background-color: #d4edda; border-color: #c3e6cb; }
+        .error { background-color: #f8d7da; border-color: #f5c6cb; }
+        .info { background-color: #d1ecf1; border-color: #bee5eb; }
+        button { padding: 10px 20px; margin: 5px; cursor: pointer; }
+        pre { background: #f8f9fa; padding: 10px; border-radius: 3px; overflow-x: auto; }
+    </style>
+</head>
+<body>
+    <h1>Backend API Test</h1>
+    
+    <div class="test-section info">
+        <h3>Test Backend Login Endpoint</h3>
+        <p>This will test the backend login API to see what response structure we get.</p>
+        <button onclick="testLogin()">Test Login</button>
+        <button onclick="testRegister()">Test Register</button>
+        <button onclick="clearResults()">Clear Results</button>
+    </div>
+    
+    <div id="results"></div>
+
+    <script>
+        const API_BASE_URL = 'https://samparkjyoti.onrender.com/api';
+        
+        function addResult(title, content, type = 'info') {
+            const resultsDiv = document.getElementById('results');
+            const div = document.createElement('div');
+            div.className = `test-section ${type}`;
+            div.innerHTML = `<h4>${title}</h4><pre>${content}</pre>`;
+            resultsDiv.appendChild(div);
+        }
+        
+        function clearResults() {
+            document.getElementById('results').innerHTML = '';
+        }
+        
+        async function testLogin() {
+            addResult('Testing Login', 'Sending login request...', 'info');
+            
+            try {
+                const response = await fetch(`${API_BASE_URL}/auth/login`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({
+                        email: 'test@example.com',
+                        password: 'password123'
+                    })
+                });
+                
+                const data = await response.json();
+                
+                if (response.ok) {
+                    addResult('Login Success', 
+                        `Status: ${response.status}\n` +
+                        `Response: ${JSON.stringify(data, null, 2)}\n\n` +
+                        `Has Token: ${!!data.token}\n` +
+                        `Has User: ${!!data.user}\n` +
+                        `Token Preview: ${data.token ? data.token.substring(0, 20) + '...' : 'N/A'}`, 
+                        'success'
+                    );
+                } else {
+                    addResult('Login Failed', 
+                        `Status: ${response.status}\n` +
+                        `Error: ${JSON.stringify(data, null, 2)}`, 
+                        'error'
+                    );
+                }
+                
+            } catch (error) {
+                addResult('Login Error', 
+                    `Error: ${error.message}\n` +
+                    `Type: ${error.name}\n` +
+                    `Stack: ${error.stack}`, 
+                    'error'
+                );
+            }
+        }
+        
+        async function testRegister() {
+            addResult('Testing Register', 'Sending register request...', 'info');
+            
+            try {
+                const response = await fetch(`${API_BASE_URL}/auth/register`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({
+                        name: 'Test User',
+                        email: 'testuser@example.com',
+                        password: 'password123',
+                        phone: '1234567890',
+                        isAgent: false
+                    })
+                });
+                
+                const data = await response.json();
+                
+                if (response.ok) {
+                    addResult('Register Success', 
+                        `Status: ${response.status}\n` +
+                        `Response: ${JSON.stringify(data, null, 2)}\n\n` +
+                        `Has Token: ${!!data.token}\n` +
+                        `Has User: ${!!data.user}\n` +
+                        `Token Preview: ${data.token ? data.token.substring(0, 20) + '...' : 'N/A'}`, 
+                        'success'
+                    );
+                } else {
+                    addResult('Register Failed', 
+                        `Status: ${response.status}\n` +
+                        `Error: ${JSON.stringify(data, null, 2)}`, 
+                        'error'
+                    );
+                }
+                
+            } catch (error) {
+                addResult('Register Error', 
+                    `Error: ${error.message}\n` +
+                    `Type: ${error.name}\n` +
+                    `Stack: ${error.stack}`, 
+                    'error'
+                );
+            }
+        }
+        
+        // Test on page load
+        window.onload = function() {
+            addResult('Page Loaded', 'Ready to test backend API endpoints', 'info');
+        };
+    </script>
+</body>
+</html>

@@ -2,19 +2,20 @@ import React, { useState, useEffect } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import { RootState, AppDispatch } from '../store/store';
 import { fetchJobs } from '../store/slices/jobsSlice';
+import { useAuth } from '../contexts/AuthContext';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import {
-  faSearch,
   faMapMarkerAlt,
   faClock,
   faBriefcase,
   faRupeeSign,
   faUser,
-  faFilter,
   faEye,
   faPhone,
   faEnvelope,
-  faStar
+  faStar,
+  faCheckCircle,
+  faLocationArrow
 } from '@fortawesome/free-solid-svg-icons';
 import styled from 'styled-components';
 import toast from 'react-hot-toast';
@@ -36,6 +37,13 @@ const Title = styled.h1`
   font-size: 2rem;
   font-weight: 700;
   margin: 0;
+`;
+
+const Subtitle = styled.p`
+  color: #64748b;
+  font-size: 1.1rem;
+  margin: 0.5rem 0 0 0;
+  font-weight: 400;
 `;
 
 const SearchSection = styled.div`
@@ -267,6 +275,66 @@ const EmptyDescription = styled.p`
   margin-bottom: 1rem;
 `;
 
+const LocationMatchBadge = styled.div`
+  display: inline-flex;
+  align-items: center;
+  gap: 0.25rem;
+  background: linear-gradient(135deg, #4CAF50 0%, #45a049 100%);
+  color: white;
+  padding: 0.25rem 0.5rem;
+  border-radius: 12px;
+  font-size: 0.75rem;
+  font-weight: 600;
+  margin-left: 0.5rem;
+`;
+
+const LocationMatchInfo = styled.div`
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  color: #4CAF50;
+  font-size: 0.875rem;
+  font-weight: 500;
+  margin-top: 0.5rem;
+`;
+
+const FilterSection = styled.div`
+  background: white;
+  padding: 1.5rem;
+  border-radius: 12px;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+  margin-bottom: 2rem;
+`;
+
+const CategoryFilter = styled.div`
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  flex-wrap: wrap;
+`;
+
+const FilterLabel = styled.label`
+  font-weight: 600;
+  color: #374151;
+  font-size: 1rem;
+`;
+
+const CategorySelect = styled.select`
+  padding: 0.75rem 1rem;
+  border: 2px solid #e5e7eb;
+  border-radius: 8px;
+  font-size: 1rem;
+  background: white;
+  min-width: 200px;
+  cursor: pointer;
+  transition: border-color 0.2s;
+
+  &:focus {
+    outline: none;
+    border-color: #1976D2;
+  }
+`;
+
 const EmployerInfo = styled.div`
   background: #f8f9fa;
   padding: 1rem;
@@ -319,43 +387,78 @@ const PostedDate = styled.span`
 
 const JobsPage: React.FC = () => {
   const dispatch = useDispatch<AppDispatch>();
+  const { user } = useAuth();
   const { jobs, loading, error } = useSelector((state: RootState) => state.jobs);
   
-  const [filters, setFilters] = useState({
-    search: '',
-    category: '',
-    location: '',
-    workType: '',
-    status: 'approved'
-  });
+  // Only show approved jobs that match user's location
+  const [showLocationMatched] = useState(true);
+  const [selectedCategory, setSelectedCategory] = useState('');
 
   useEffect(() => {
     dispatch(fetchJobs());
   }, [dispatch]);
 
-  const handleFilterChange = (key: string, value: string) => {
-    setFilters(prev => ({
-      ...prev,
-      [key]: value
-    }));
+  // No filter changes needed - only show approved location-matched jobs
+
+  // Function to check if job location matches user location
+  const isLocationMatch = (jobLocation: string, userLocation?: string) => {
+    if (!userLocation) return false;
+    
+    const jobLocationLower = jobLocation.toLowerCase();
+    const userLocationLower = userLocation.toLowerCase();
+    
+    // Debug logging
+    console.log('Location Matching Debug:');
+    console.log('  Job Location:', jobLocation, '->', jobLocationLower);
+    console.log('  User Location:', userLocation, '->', userLocationLower);
+    console.log('  Job city:', jobLocation.split(',')[0]?.toLowerCase());
+    console.log('  User city:', userLocation.split(',')[0]?.toLowerCase());
+    
+    // Check for exact match or if job location contains user location
+    const exactMatch = jobLocationLower.includes(userLocationLower);
+    const reverseMatch = userLocationLower.includes(jobLocationLower);
+    const jobCityMatch = jobLocationLower.includes(userLocation.split(',')[0]?.toLowerCase() || '');
+    const userCityMatch = userLocationLower.includes(jobLocation.split(',')[0]?.toLowerCase() || '');
+    
+    const isMatch = exactMatch || reverseMatch || jobCityMatch || userCityMatch;
+    
+    console.log('  Exact match:', exactMatch);
+    console.log('  Reverse match:', reverseMatch);
+    console.log('  Job city match:', jobCityMatch);
+    console.log('  User city match:', userCityMatch);
+    console.log('  Final match:', isMatch);
+    
+    return isMatch;
   };
 
+  // Only show approved jobs that match user's location and selected category
   const filteredJobs = jobs.filter(job => {
-    const matchesSearch = filters.search === '' || 
-      job.title.toLowerCase().includes(filters.search.toLowerCase()) ||
-      job.description.toLowerCase().includes(filters.search.toLowerCase()) ||
-      job.location.toLowerCase().includes(filters.search.toLowerCase());
+    // Must be approved
+    const isApproved = job.status === 'approved';
     
-    const matchesCategory = filters.category === '' || job.category === filters.category;
-    const matchesLocation = filters.location === '' || job.location.toLowerCase().includes(filters.location.toLowerCase());
-    const matchesWorkType = filters.workType === '' || job.workType === filters.workType;
-    const matchesStatus = filters.status === '' || job.status === filters.status;
+    // Must match user's location
+    const matchesLocation = isLocationMatch(job.location, user?.location);
+    
+    // Must match selected category (if any)
+    const matchesCategory = selectedCategory === '' || job.category === selectedCategory;
+    
+    const jobMatches = isApproved && matchesLocation && matchesCategory;
+    
+    console.log(`Job "${job.title}" (${job.location}):`, {
+      status: job.status,
+      category: job.category,
+      isApproved,
+      matchesLocation,
+      matchesCategory,
+      finalMatch: jobMatches
+    });
 
-    return matchesSearch && matchesCategory && matchesLocation && matchesWorkType && matchesStatus;
+    return jobMatches;
   });
 
+  console.log('JobsPage - Approved location-matched jobs:', filteredJobs.length);
+
   const categories = ['cooking', 'construction', 'agriculture', 'driving', 'household', 'other'];
-  const workTypes = ['daily_wage', 'contract', 'full_time', 'part_time'];
 
   const handleApply = (jobId: string) => {
     toast.success('Application functionality will be implemented soon!');
@@ -382,28 +485,18 @@ const JobsPage: React.FC = () => {
   return (
     <JobsContainer>
       <Header>
-        <Title>Find Jobs</Title>
+        <Title>Approved Jobs in Your Area</Title>
+        <Subtitle>
+          Showing approved jobs that match your location: {user?.location || 'Unknown'}
+        </Subtitle>
       </Header>
 
-      <SearchSection>
-        <SearchRow>
-          <SearchGroup>
-            <SearchIcon>
-              <FontAwesomeIcon icon={faSearch} />
-            </SearchIcon>
-            <SearchInput
-              type="text"
-              placeholder="Search jobs by title, description, or location..."
-              value={filters.search}
-              onChange={(e) => handleFilterChange('search', e.target.value)}
-            />
-          </SearchGroup>
-        </SearchRow>
-
-        <FilterRow>
-          <Select
-            value={filters.category}
-            onChange={(e) => handleFilterChange('category', e.target.value)}
+      <FilterSection>
+        <CategoryFilter>
+          <FilterLabel>Filter by Category:</FilterLabel>
+          <CategorySelect
+            value={selectedCategory}
+            onChange={(e) => setSelectedCategory(e.target.value)}
           >
             <option value="">All Categories</option>
             {categories.map(category => (
@@ -411,36 +504,18 @@ const JobsPage: React.FC = () => {
                 {category.charAt(0).toUpperCase() + category.slice(1)}
               </option>
             ))}
-          </Select>
-
-          <Select
-            value={filters.workType}
-            onChange={(e) => handleFilterChange('workType', e.target.value)}
-          >
-            <option value="">All Work Types</option>
-            {workTypes.map(type => (
-              <option key={type} value={type}>
-                {type.replace('_', ' ').replace(/\b\w/g, l => l.toUpperCase())}
-              </option>
-            ))}
-          </Select>
-
-          <Select
-            value={filters.status}
-            onChange={(e) => handleFilterChange('status', e.target.value)}
-          >
-            <option value="approved">Approved Jobs</option>
-            <option value="pending">Pending Jobs</option>
-            <option value="">All Jobs</option>
-          </Select>
-        </FilterRow>
-      </SearchSection>
+          </CategorySelect>
+        </CategoryFilter>
+      </FilterSection>
 
       {filteredJobs.length === 0 ? (
         <EmptyMessage>
-          <EmptyTitle>No jobs found</EmptyTitle>
+          <EmptyTitle>No Approved Jobs Found</EmptyTitle>
           <EmptyDescription>
-            Try adjusting your search criteria or check back later for new opportunities.
+            {selectedCategory 
+              ? `No approved ${selectedCategory} jobs found in your area (${user?.location || 'Unknown'}). Try selecting a different category.`
+              : `No approved jobs found matching your location (${user?.location || 'Unknown'}). Check back later for new opportunities in your area.`
+            }
           </EmptyDescription>
         </EmptyMessage>
       ) : (
@@ -459,6 +534,12 @@ const JobsPage: React.FC = () => {
                 <MetaItem>
                   <FontAwesomeIcon icon={faMapMarkerAlt} />
                   {job.location}, {job.state}
+                  {isLocationMatch(job.location, user?.location) && (
+                    <LocationMatchBadge>
+                      <FontAwesomeIcon icon={faCheckCircle} />
+                      Location Match
+                    </LocationMatchBadge>
+                  )}
                 </MetaItem>
                 <MetaItem>
                   <FontAwesomeIcon icon={faClock} />
@@ -473,6 +554,13 @@ const JobsPage: React.FC = () => {
                   {job.experienceRequired} experience
                 </MetaItem>
               </JobMeta>
+
+              {isLocationMatch(job.location, user?.location) && (
+                <LocationMatchInfo>
+                  <FontAwesomeIcon icon={faLocationArrow} />
+                  This job matches your location: {user?.location}
+                </LocationMatchInfo>
+              )}
 
               <JobDescription>
                 {job.description.length > 150 

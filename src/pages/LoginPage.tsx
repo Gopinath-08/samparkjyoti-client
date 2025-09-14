@@ -171,14 +171,18 @@ const LoginPage: React.FC = () => {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    console.log('LoginPage - Form submitted with data:', formData);
     setIsLoading(true);
     setError('');
 
     try {
+      console.log('LoginPage - Dispatching login action...');
       await dispatch(login(formData)).unwrap();
+      console.log('LoginPage - Login successful, navigating to home');
       toast.success('Login successful!');
       navigate('/home');
     } catch (error: any) {
+      console.error('LoginPage - Login error:', error);
       setError(error || 'Login failed');
       toast.error(error || 'Login failed');
     } finally {

@@ -5,6 +5,7 @@ import { store } from './store/store';
 import { Toaster } from 'react-hot-toast';
 import { AuthProvider } from './contexts/AuthContext';
 import Layout from './components/Layout';
+import RoleGuard from './components/RoleGuard';
 import HomePage from './pages/HomePage';
 import JobsPage from './pages/JobsPage';
 import MarketPage from './pages/MarketPage';
@@ -32,13 +33,45 @@ const App: React.FC = () => {
               <Route path="/" element={<Layout />}>
                 <Route index element={<Navigate to="/home" replace />} />
                 <Route path="home" element={<HomePage />} />
+                
+                {/* Public viewing routes - everyone can access */}
                 <Route path="jobs" element={<JobsPage />} />
                 <Route path="market" element={<MarketPage />} />
                 <Route path="profile" element={<ProfilePage />} />
-                <Route path="post-job" element={<JobPostingPage />} />
-                <Route path="sell-product" element={<ProductPostingPage />} />
-                <Route path="agent-dashboard" element={<AgentDashboard />} />
-                <Route path="create-worker" element={<CreateWorkerPage />} />
+                
+                {/* Role-restricted routes */}
+                <Route 
+                  path="post-job" 
+                  element={
+                    <RoleGuard requiredPermissions={['canPostJobs']}>
+                      <JobPostingPage />
+                    </RoleGuard>
+                  } 
+                />
+                <Route 
+                  path="sell-product" 
+                  element={
+                    <RoleGuard requiredPermissions={['canPostProducts']}>
+                      <ProductPostingPage />
+                    </RoleGuard>
+                  } 
+                />
+                <Route 
+                  path="agent-dashboard" 
+                  element={
+                    <RoleGuard requiredRoles={['agent']}>
+                      <AgentDashboard />
+                    </RoleGuard>
+                  } 
+                />
+                <Route 
+                  path="create-worker" 
+                  element={
+                    <RoleGuard requiredPermissions={['canCreateWorkers']}>
+                      <CreateWorkerPage />
+                    </RoleGuard>
+                  } 
+                />
               </Route>
             </Routes>
             <Toaster 

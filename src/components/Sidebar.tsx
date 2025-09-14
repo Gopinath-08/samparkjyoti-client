@@ -1,6 +1,7 @@
 import React from 'react';
 import { NavLink } from 'react-router-dom';
 import { useAuth } from '../contexts/AuthContext';
+import { getRolePermissions } from '../utils/roleUtils';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import {
   faHome,
@@ -10,7 +11,9 @@ import {
   faPlus,
   faUsers,
   faTachometerAlt,
-  faHammer
+  faHammer,
+  faShoppingCart,
+  faUserTie
 } from '@fortawesome/free-solid-svg-icons';
 import styled from 'styled-components';
 
@@ -135,7 +138,9 @@ const SectionTitle = styled.div`
 
 const Sidebar: React.FC = () => {
   const { user } = useAuth();
+  const permissions = getRolePermissions(user);
 
+  // Common navigation items - everyone can access
   const commonNavItems = [
     { to: '/home', icon: faHome, label: 'Home' },
     { to: '/jobs', icon: faBriefcase, label: 'Find Jobs' },
@@ -143,13 +148,34 @@ const Sidebar: React.FC = () => {
     { to: '/profile', icon: faUser, label: 'Profile' },
   ];
 
-  const userNavItems = user?.isAgent ? [
-    { to: '/agent-dashboard', icon: faTachometerAlt, label: 'Dashboard' },
-    { to: '/create-worker', icon: faUsers, label: 'Create Worker' },
-  ] : [
-    { to: '/post-job', icon: faPlus, label: 'Post Job' },
-    { to: '/sell-product', icon: faHammer, label: 'Sell Product' },
-  ];
+  // Role-based navigation items
+  const getRoleBasedNavItems = () => {
+    const items = [];
+
+    // Job posting - only employers
+    if (permissions.canPostJobs) {
+      items.push({ to: '/post-job', icon: faPlus, label: 'Post Job' });
+    }
+
+    // Product posting - only farmers
+    if (permissions.canPostProducts) {
+      items.push({ to: '/sell-product', icon: faHammer, label: 'Sell Product' });
+    }
+
+    // Worker creation - only agents
+    if (permissions.canCreateWorkers) {
+      items.push({ to: '/create-worker', icon: faUsers, label: 'Create Worker' });
+    }
+
+    // Agent dashboard - only agents
+    if (permissions.canViewAnalytics) {
+      items.push({ to: '/agent-dashboard', icon: faTachometerAlt, label: 'Dashboard' });
+    }
+
+    return items;
+  };
+
+  const roleBasedNavItems = getRoleBasedNavItems();
 
   return (
     <SidebarContainer>
@@ -163,15 +189,19 @@ const Sidebar: React.FC = () => {
         </NavItem>
       ))}
       
-      <SectionTitle>{user?.isAgent ? 'Agent Tools' : 'Post & Sell'}</SectionTitle>
-      {userNavItems.map((item) => (
-        <NavItem key={item.to} to={item.to}>
-          <NavIcon>
-            <FontAwesomeIcon icon={item.icon} />
-          </NavIcon>
-          <NavLabel>{item.label}</NavLabel>
-        </NavItem>
-      ))}
+      {roleBasedNavItems.length > 0 && (
+        <>
+          <SectionTitle>Your Tools</SectionTitle>
+          {roleBasedNavItems.map((item) => (
+            <NavItem key={item.to} to={item.to}>
+              <NavIcon>
+                <FontAwesomeIcon icon={item.icon} />
+              </NavIcon>
+              <NavLabel>{item.label}</NavLabel>
+            </NavItem>
+          ))}
+        </>
+      )}
     </SidebarContainer>
   );
 };

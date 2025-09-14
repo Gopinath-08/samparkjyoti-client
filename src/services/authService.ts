@@ -70,11 +70,14 @@ export const authService = {
     const response = await api.post('/auth/login', credentials);
     console.log('AuthService - Login response:', response.data);
     
-    if (response.data.token) {
-      console.log('AuthService - Storing token:', response.data.token);
-      console.log('AuthService - Storing user:', response.data.user);
-      localStorage.setItem('token', response.data.token);
-      localStorage.setItem('user', JSON.stringify(response.data.user));
+    // Backend returns: { status: "success", data: { user: {...}, token: "..." } }
+    const responseData = response.data.data || response.data;
+    
+    if (responseData.token) {
+      console.log('AuthService - Storing token:', responseData.token);
+      console.log('AuthService - Storing user:', responseData.user);
+      localStorage.setItem('token', responseData.token);
+      localStorage.setItem('user', JSON.stringify(responseData.user));
       console.log('AuthService - Token stored:', !!localStorage.getItem('token'));
       console.log('AuthService - User stored:', !!localStorage.getItem('user'));
     } else {
@@ -88,11 +91,14 @@ export const authService = {
     const response = await api.post('/auth/register', userData);
     console.log('AuthService - Register response:', response.data);
     
-    if (response.data.token) {
-      console.log('AuthService - Storing token:', response.data.token);
-      console.log('AuthService - Storing user:', response.data.user);
-      localStorage.setItem('token', response.data.token);
-      localStorage.setItem('user', JSON.stringify(response.data.user));
+    // Backend returns: { status: "success", data: { user: {...}, token: "..." } }
+    const responseData = response.data.data || response.data;
+    
+    if (responseData.token) {
+      console.log('AuthService - Storing token:', responseData.token);
+      console.log('AuthService - Storing user:', responseData.user);
+      localStorage.setItem('token', responseData.token);
+      localStorage.setItem('user', JSON.stringify(responseData.user));
       console.log('AuthService - Token stored:', !!localStorage.getItem('token'));
       console.log('AuthService - User stored:', !!localStorage.getItem('user'));
     } else {
@@ -102,9 +108,18 @@ export const authService = {
   },
 
   async logout() {
-    localStorage.removeItem('token');
-    localStorage.removeItem('user');
-    return api.post('/auth/logout');
+    try {
+      // Call backend logout endpoint first
+      await api.post('/auth/logout');
+    } catch (error) {
+      // Even if backend call fails, we should still clear local storage
+      console.warn('Backend logout failed, but clearing local storage:', error);
+    } finally {
+      // Always clear local storage regardless of backend response
+      localStorage.removeItem('token');
+      localStorage.removeItem('user');
+      console.log('Local storage cleared on logout');
+    }
   },
 
   async getCurrentUser() {

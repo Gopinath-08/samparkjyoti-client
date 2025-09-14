@@ -76,8 +76,13 @@ export const fetchJobs = createAsyncThunk(
   async (_, { rejectWithValue }) => {
     try {
       const response = await jobService.getJobs();
-      return response.data?.jobs || [];
+      console.log('Redux - fetchJobs response:', response.data);
+      // Backend returns: { status: "success", data: { jobs: [...] } }
+      const jobs = response.data?.data?.jobs || response.data?.jobs || [];
+      console.log('Redux - extracted jobs:', jobs);
+      return jobs;
     } catch (error: any) {
+      console.error('Redux - fetchJobs error:', error);
       return rejectWithValue(error.response?.data?.message || 'Failed to fetch jobs');
     }
   }
@@ -124,14 +129,21 @@ const jobsSlice = createSlice({
       })
       .addCase(fetchJobs.fulfilled, (state, action) => {
         state.loading = false;
-        state.jobs = action.payload;
+        // Map _id to id for frontend compatibility
+        const jobsWithId = action.payload.map((job: any) => ({
+          ...job,
+          id: job._id || job.id
+        }));
+        state.jobs = jobsWithId;
         state.stats = {
-          total: action.payload.length,
-          pending: action.payload.filter((job: Job) => job.status === 'pending').length,
-          approved: action.payload.filter((job: Job) => job.status === 'approved').length,
-          rejected: action.payload.filter((job: Job) => job.status === 'rejected').length,
-          underReview: action.payload.filter((job: Job) => job.status === 'under_review').length,
+          total: jobsWithId.length,
+          pending: jobsWithId.filter((job: Job) => job.status === 'pending').length,
+          approved: jobsWithId.filter((job: Job) => job.status === 'approved').length,
+          rejected: jobsWithId.filter((job: Job) => job.status === 'rejected').length,
+          underReview: jobsWithId.filter((job: Job) => job.status === 'under_review').length,
         };
+        console.log('Redux - Jobs loaded:', jobsWithId.length, 'jobs');
+        console.log('Redux - Approved jobs:', state.stats.approved);
       })
       .addCase(fetchJobs.rejected, (state, action) => {
         state.loading = false;

@@ -33,7 +33,12 @@ export const login = createAsyncThunk(
       console.log('Redux - Login thunk called with:', credentials);
       const response = await authService.login(credentials);
       console.log('Redux - Login response received:', response.data);
-      return response.data;
+      
+      // Backend returns: { status: "success", data: { user: {...}, token: "..." } }
+      const responseData = response.data.data || response.data;
+      console.log('Redux - Extracted data:', responseData);
+      
+      return responseData;
     } catch (error: any) {
       console.error('Redux - Login error:', error);
       return rejectWithValue(error.response?.data?.message || 'Login failed');
@@ -48,7 +53,12 @@ export const register = createAsyncThunk(
       console.log('Redux - Register thunk called with:', userData);
       const response = await authService.register(userData);
       console.log('Redux - Register response received:', response.data);
-      return response.data;
+      
+      // Backend returns: { status: "success", data: { user: {...}, token: "..." } }
+      const responseData = response.data.data || response.data;
+      console.log('Redux - Extracted data:', responseData);
+      
+      return responseData;
     } catch (error: any) {
       console.error('Redux - Register error:', error);
       return rejectWithValue(error.response?.data?.message || 'Registration failed');
@@ -63,7 +73,9 @@ export const logout = createAsyncThunk(
       await authService.logout();
       return null;
     } catch (error: any) {
-      return rejectWithValue(error.response?.data?.message || 'Logout failed');
+      // Even if logout fails, we should still clear the state
+      console.warn('Logout error, but clearing state:', error);
+      return null;
     }
   }
 );
@@ -139,6 +151,14 @@ const authSlice = createSlice({
         state.user = null;
         state.isAuthenticated = false;
         state.error = null;
+        state.isLoading = false;
+      })
+      .addCase(logout.rejected, (state) => {
+        // Clear state even if logout fails
+        state.user = null;
+        state.isAuthenticated = false;
+        state.error = null;
+        state.isLoading = false;
       })
       
       // Get current user

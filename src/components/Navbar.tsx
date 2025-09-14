@@ -1,8 +1,10 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { useAuth } from '../contexts/AuthContext';
+import { useNavigate } from 'react-router-dom';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faBell, faUser, faSignOutAlt } from '@fortawesome/free-solid-svg-icons';
 import styled from 'styled-components';
+import toast from 'react-hot-toast';
 
 const NavbarContainer = styled.nav`
   background: linear-gradient(135deg, #1976D2 0%, #1565C0 100%);
@@ -143,15 +145,99 @@ const NotificationIcon = styled.div`
   }
 `;
 
+const LogoutConfirmation = styled.div`
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(0, 0, 0, 0.5);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 1000;
+`;
+
+const ConfirmationDialog = styled.div`
+  background: white;
+  padding: 2rem;
+  border-radius: 12px;
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
+  text-align: center;
+  max-width: 400px;
+  width: 90%;
+`;
+
+const DialogTitle = styled.h3`
+  color: #333;
+  margin: 0 0 1rem 0;
+  font-size: 1.2rem;
+`;
+
+const DialogMessage = styled.p`
+  color: #666;
+  margin: 0 0 2rem 0;
+  line-height: 1.5;
+`;
+
+const ButtonGroup = styled.div`
+  display: flex;
+  gap: 1rem;
+  justify-content: center;
+`;
+
+const Button = styled.button<{ variant?: 'primary' | 'secondary' }>`
+  padding: 0.75rem 1.5rem;
+  border: none;
+  border-radius: 8px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  
+  ${props => props.variant === 'primary' ? `
+    background: #f44336;
+    color: white;
+    
+    &:hover {
+      background: #d32f2f;
+    }
+  ` : `
+    background: #f5f5f5;
+    color: #333;
+    
+    &:hover {
+      background: #e0e0e0;
+    }
+  `}
+`;
+
 const Navbar: React.FC = () => {
   const { user, logout } = useAuth();
+  const navigate = useNavigate();
+  const [showLogoutConfirm, setShowLogoutConfirm] = useState(false);
+  const [isLoggingOut, setIsLoggingOut] = useState(false);
 
   const handleLogout = async () => {
     try {
+      setIsLoggingOut(true);
       await logout();
+      toast.success('Logged out successfully');
+      navigate('/login');
     } catch (error) {
       console.error('Logout failed:', error);
+      toast.error('Logout failed. Please try again.');
+    } finally {
+      setIsLoggingOut(false);
+      setShowLogoutConfirm(false);
     }
+  };
+
+  const confirmLogout = () => {
+    setShowLogoutConfirm(true);
+  };
+
+  const cancelLogout = () => {
+    setShowLogoutConfirm(false);
   };
 
   return (
@@ -169,12 +255,31 @@ const Navbar: React.FC = () => {
         <UserInfo>
           <UserName>Welcome, {user?.name}!</UserName>
           {user?.isAgent && <AgentBadge>Agent</AgentBadge>}
-          <NavItem onClick={handleLogout}>
+          <NavItem onClick={confirmLogout}>
             <FontAwesomeIcon icon={faSignOutAlt} />
             Logout
           </NavItem>
         </UserInfo>
       </NavItems>
+
+      {showLogoutConfirm && (
+        <LogoutConfirmation>
+          <ConfirmationDialog>
+            <DialogTitle>Confirm Logout</DialogTitle>
+            <DialogMessage>
+              Are you sure you want to logout? You'll need to sign in again to access your account.
+            </DialogMessage>
+            <ButtonGroup>
+              <Button variant="secondary" onClick={cancelLogout} disabled={isLoggingOut}>
+                Cancel
+              </Button>
+              <Button variant="primary" onClick={handleLogout} disabled={isLoggingOut}>
+                {isLoggingOut ? 'Logging out...' : 'Logout'}
+              </Button>
+            </ButtonGroup>
+          </ConfirmationDialog>
+        </LogoutConfirmation>
+      )}
     </NavbarContainer>
   );
 };

@@ -1,0 +1,182 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Deployed Backend Test</title>
+    <style>
+        body { font-family: Arial, sans-serif; margin: 20px; }
+        .test-section { margin: 20px 0; padding: 15px; border: 1px solid #ccc; border-radius: 5px; }
+        .success { background-color: #d4edda; border-color: #c3e6cb; }
+        .error { background-color: #f8d7da; border-color: #f5c6cb; }
+        .info { background-color: #d1ecf1; border-color: #bee5eb; }
+        button { padding: 10px 20px; margin: 5px; cursor: pointer; }
+        pre { background: #f8f9fa; padding: 10px; border-radius: 3px; overflow-x: auto; }
+        .loading { color: #007bff; }
+    </style>
+</head>
+<body>
+    <h1>Deployed Backend Test</h1>
+    <p><strong>Testing:</strong> https://samparkjyoti.onrender.com/api</p>
+    
+    <div class="test-section info">
+        <h3>Backend Status Tests</h3>
+        <button onclick="testHealth()">Test Health Endpoint</button>
+        <button onclick="testLogin()">Test Login Endpoint</button>
+        <button onclick="testRegister()">Test Register Endpoint</button>
+        <button onclick="clearResults()">Clear Results</button>
+    </div>
+    
+    <div id="results"></div>
+
+    <script>
+        const API_BASE_URL = 'https://samparkjyoti.onrender.com/api';
+        
+        function addResult(title, content, type = 'info') {
+            const resultsDiv = document.getElementById('results');
+            const div = document.createElement('div');
+            div.className = `test-section ${type}`;
+            div.innerHTML = `<h4>${title}</h4><pre>${content}</pre>`;
+            resultsDiv.appendChild(div);
+            resultsDiv.scrollTop = resultsDiv.scrollHeight;
+        }
+        
+        function clearResults() {
+            document.getElementById('results').innerHTML = '';
+        }
+        
+        async function testHealth() {
+            addResult('Testing Health Endpoint', 'Checking if backend is responding...', 'info');
+            
+            try {
+                const response = await fetch(`${API_BASE_URL.replace('/api', '')}/health`, {
+                    method: 'GET',
+                    mode: 'cors'
+                });
+                
+                const data = await response.text();
+                
+                if (response.ok) {
+                    addResult('Health Check Success', 
+                        `Status: ${response.status}\n` +
+                        `Response: ${data}`, 
+                        'success'
+                    );
+                } else {
+                    addResult('Health Check Failed', 
+                        `Status: ${response.status}\n` +
+                        `Response: ${data}`, 
+                        'error'
+                    );
+                }
+                
+            } catch (error) {
+                addResult('Health Check Error', 
+                    `Error: ${error.message}\n` +
+                    `Type: ${error.name}`, 
+                    'error'
+                );
+            }
+        }
+        
+        async function testLogin() {
+            addResult('Testing Login Endpoint', 'Sending login request...', 'info');
+            
+            try {
+                const response = await fetch(`${API_BASE_URL}/auth/login`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({
+                        email: 'test@example.com',
+                        password: 'password123'
+                    }),
+                    mode: 'cors'
+                });
+                
+                const data = await response.json();
+                
+                if (response.ok) {
+                    addResult('Login Success', 
+                        `Status: ${response.status}\n` +
+                        `Response: ${JSON.stringify(data, null, 2)}\n\n` +
+                        `Has Token: ${!!data.token}\n` +
+                        `Has User: ${!!data.user}\n` +
+                        `Token Preview: ${data.token ? data.token.substring(0, 20) + '...' : 'N/A'}`, 
+                        'success'
+                    );
+                } else {
+                    addResult('Login Failed', 
+                        `Status: ${response.status}\n` +
+                        `Error: ${JSON.stringify(data, null, 2)}`, 
+                        'error'
+                    );
+                }
+                
+            } catch (error) {
+                addResult('Login Error', 
+                    `Error: ${error.message}\n` +
+                    `Type: ${error.name}\n` +
+                    `Stack: ${error.stack}`, 
+                    'error'
+                );
+            }
+        }
+        
+        async function testRegister() {
+            addResult('Testing Register Endpoint', 'Sending register request...', 'info');
+            
+            try {
+                const response = await fetch(`${API_BASE_URL}/auth/register`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({
+                        name: 'Test User',
+                        email: 'testuser@example.com',
+                        password: 'password123',
+                        phone: '1234567890',
+                        isAgent: false
+                    }),
+                    mode: 'cors'
+                });
+                
+                const data = await response.json();
+                
+                if (response.ok) {
+                    addResult('Register Success', 
+                        `Status: ${response.status}\n` +
+                        `Response: ${JSON.stringify(data, null, 2)}\n\n` +
+                        `Has Token: ${!!data.token}\n` +
+                        `Has User: ${!!data.user}\n` +
+                        `Token Preview: ${data.token ? data.token.substring(0, 20) + '...' : 'N/A'}`, 
+                        'success'
+                    );
+                } else {
+                    addResult('Register Failed', 
+                        `Status: ${response.status}\n` +
+                        `Error: ${JSON.stringify(data, null, 2)}`, 
+                        'error'
+                    );
+                }
+                
+            } catch (error) {
+                addResult('Register Error', 
+                    `Error: ${error.message}\n` +
+                    `Type: ${error.name}\n` +
+                    `Stack: ${error.stack}`, 
+                    'error'
+                );
+            }
+        }
+        
+        // Test on page load
+        window.onload = function() {
+            addResult('Page Loaded', 'Ready to test deployed backend API endpoints', 'info');
+            addResult('Backend URL', `Testing: ${API_BASE_URL}`, 'info');
+        };
+    </script>
+</body>
+</html>
