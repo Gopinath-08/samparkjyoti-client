@@ -28,7 +28,7 @@ A web-based client interface for the Sampark Jyoti platform, designed for PC use
 - Profile management
 - Agent and regular user accounts
 - Role-based access control
-
+-Smart Location matching 
 ### 🤝 Agent Features
 - Agent dashboard
 - Worker profile creation
