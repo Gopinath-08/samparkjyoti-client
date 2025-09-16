@@ -145,6 +145,7 @@ const Sidebar: React.FC = () => {
     { to: '/home', icon: faHome, label: 'Home' },
     { to: '/jobs', icon: faBriefcase, label: 'Find Jobs' },
     { to: '/market', icon: faStore, label: 'Market' },
+    { to: '/ustad', icon: faHammer, label: 'Ustaad' },
     { to: '/profile', icon: faUser, label: 'Profile' },
   ];
 

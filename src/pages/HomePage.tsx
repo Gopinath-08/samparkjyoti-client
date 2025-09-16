@@ -2,7 +2,7 @@ import React, { useEffect } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import { useAuth } from '../contexts/AuthContext';
 import { RootState, AppDispatch } from '../store/store';
-import { fetchJobs } from '../store/slices/jobsSlice';
+import { fetchJobs, fetchJobsForUser, fetchLocationRecommendations } from '../store/slices/jobsSlice';
 import { fetchProducts } from '../store/slices/productsSlice';
 import { getRolePermissions, getRoleDisplayName } from '../utils/roleUtils';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
@@ -229,17 +229,46 @@ const ItemDescription = styled.p`
   line-height: 1.4;
 `;
 
+const LocationIndicator = styled.div`
+  background: linear-gradient(135deg, #E8F5E8, #C8E6C9);
+  border: 1px solid #4CAF50;
+  border-radius: 12px;
+  padding: 1rem 1.5rem;
+  margin-bottom: 2rem;
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  color: #2E7D32;
+  font-size: 0.95rem;
+  box-shadow: 0 2px 8px rgba(76, 175, 80, 0.15);
+
+  svg {
+    color: #4CAF50;
+    font-size: 1.1rem;
+  }
+
+  strong {
+    color: #1B5E20;
+    font-weight: 600;
+  }
+`;
+
 const HomePage: React.FC = () => {
   const dispatch = useDispatch<AppDispatch>();
   const { user } = useAuth();
-  const { jobs, stats: jobStats } = useSelector((state: RootState) => state.jobs);
+  const { jobs, stats: jobStats, locationFiltered, userLocation, recommendations, totalMatches } = useSelector((state: RootState) => state.jobs);
   const { products, stats: productStats } = useSelector((state: RootState) => state.products);
   const permissions = getRolePermissions(user);
 
   useEffect(() => {
-    dispatch(fetchJobs());
+    // Fetch location-based recommendations if user has location
+    if (user?.location) {
+      dispatch(fetchLocationRecommendations({ userLocation: user.location, limit: 10 }));
+    } else {
+      dispatch(fetchJobs());
+    }
     dispatch(fetchProducts());
-  }, [dispatch]);
+  }, [dispatch, user?.location]);
 
   const recentJobs = jobs.slice(0, 3);
   const recentProducts = products.slice(0, 3);
@@ -338,6 +367,17 @@ const HomePage: React.FC = () => {
           </AgentBadge>
         )}
       </WelcomeSection>
+
+      {/* Location-based filtering indicator */}
+      {locationFiltered && userLocation && (
+        <LocationIndicator>
+          <FontAwesomeIcon icon={faMapMarkerAlt} />
+          <span>
+            Showing jobs near <strong>{userLocation}</strong>
+            {totalMatches > 0 && ` • ${totalMatches} location matches found`}
+          </span>
+        </LocationIndicator>
+      )}
 
       <QuickActions>
         <SectionTitle>Quick Actions</SectionTitle>

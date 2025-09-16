@@ -76,8 +76,16 @@ export const authService = {
     if (responseData.token) {
       console.log('AuthService - Storing token:', responseData.token);
       console.log('AuthService - Storing user:', responseData.user);
+      
+      // Map _id to id for frontend compatibility
+      const userData = { ...responseData.user };
+      if (userData._id) {
+        userData.id = userData._id;
+        delete userData._id;
+      }
+      
       localStorage.setItem('token', responseData.token);
-      localStorage.setItem('user', JSON.stringify(responseData.user));
+      localStorage.setItem('user', JSON.stringify(userData));
       console.log('AuthService - Token stored:', !!localStorage.getItem('token'));
       console.log('AuthService - User stored:', !!localStorage.getItem('user'));
     } else {
@@ -97,8 +105,16 @@ export const authService = {
     if (responseData.token) {
       console.log('AuthService - Storing token:', responseData.token);
       console.log('AuthService - Storing user:', responseData.user);
+      
+      // Map _id to id for frontend compatibility
+      const userData = { ...responseData.user };
+      if (userData._id) {
+        userData.id = userData._id;
+        delete userData._id;
+      }
+      
       localStorage.setItem('token', responseData.token);
-      localStorage.setItem('user', JSON.stringify(responseData.user));
+      localStorage.setItem('user', JSON.stringify(userData));
       console.log('AuthService - Token stored:', !!localStorage.getItem('token'));
       console.log('AuthService - User stored:', !!localStorage.getItem('user'));
     } else {

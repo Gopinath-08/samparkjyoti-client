@@ -16,6 +16,7 @@ import JobPostingPage from './pages/JobPostingPage';
 import ProductPostingPage from './pages/ProductPostingPage';
 import AgentDashboard from './pages/AgentDashboard';
 import CreateWorkerPage from './pages/CreateWorkerPage';
+import UstadPage from './pages/UstadPage';
 import './App.css';
 
 const App: React.FC = () => {
@@ -37,6 +38,7 @@ const App: React.FC = () => {
                 {/* Public viewing routes - everyone can access */}
                 <Route path="jobs" element={<JobsPage />} />
                 <Route path="market" element={<MarketPage />} />
+                <Route path="ustad" element={<UstadPage />} />
                 <Route path="profile" element={<ProfilePage />} />
                 
                 {/* Role-restricted routes */}

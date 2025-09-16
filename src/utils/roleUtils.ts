@@ -1,4 +1,17 @@
-import { User } from '../services/authService';
+// Define User interface locally to avoid circular dependencies
+interface User {
+  id: string;
+  name: string;
+  email: string;
+  phone: string;
+  location?: string;
+  isAgent?: boolean;
+  profileComplete?: boolean;
+  roles?: string[];
+  primaryRole?: string;
+  languages?: string[];
+  preferredLanguage?: string;
+}
 
 export type UserRole = 'labour' | 'farmer' | 'employer' | 'buyer' | 'agent';
 
@@ -35,7 +48,7 @@ export const getRolePermissions = (user: User | null): RolePermissions => {
 
   const roles = user.roles || [];
   const primaryRole = user.primaryRole;
-  const isAgent = user.isAgent;
+  const isAgent = user.isAgent ?? false;
 
   return {
     // Job posting - Only employers can post jobs
@@ -85,7 +98,7 @@ export const hasAnyRole = (user: User | null, roles: UserRole[]): boolean => {
 };
 
 export const isAgent = (user: User | null): boolean => {
-  return user?.isAgent || false;
+  return user?.isAgent ?? false;
 };
 
 export const getRoleDisplayName = (role: UserRole): string => {
@@ -109,3 +122,4 @@ export const getRoleDescription = (role: UserRole): string => {
   };
   return descriptions[role] || '';
 };
+

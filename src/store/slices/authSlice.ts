@@ -1,14 +1,41 @@
 import { createSlice, createAsyncThunk, PayloadAction } from '@reduxjs/toolkit';
 import { authService } from '../../services/authService';
 
+// Utility function to normalize user data from backend
+const normalizeUserData = (userData: any) => {
+  if (!userData) return userData;
+  
+  const normalized = { ...userData };
+  
+  // Map _id to id for frontend compatibility
+  if (normalized._id) {
+    normalized.id = normalized._id;
+    delete normalized._id;
+  }
+  
+  // Ensure isAgent is set based on roles
+  if (normalized.roles) {
+    normalized.isAgent = normalized.roles.includes('agent');
+  }
+  
+  // Set default values
+  normalized.profileComplete = normalized.profileComplete ?? true;
+  
+  return normalized;
+};
+
 interface User {
   id: string;
   name: string;
   email: string;
   phone: string;
   location?: string;
-  isAgent: boolean;
-  profileComplete: boolean;
+  isAgent?: boolean;
+  profileComplete?: boolean;
+  roles?: string[];
+  primaryRole?: string;
+  languages?: string[];
+  preferredLanguage?: string;
 }
 
 interface AuthState {
@@ -100,7 +127,7 @@ const authSlice = createSlice({
       state.error = null;
     },
     setUser: (state, action: PayloadAction<User>) => {
-      state.user = action.payload;
+      state.user = normalizeUserData(action.payload);
       state.isAuthenticated = true;
     },
   },
@@ -114,7 +141,7 @@ const authSlice = createSlice({
       .addCase(login.fulfilled, (state, action) => {
         console.log('Redux - Login fulfilled with payload:', action.payload);
         state.isLoading = false;
-        state.user = action.payload.user;
+        state.user = normalizeUserData(action.payload.user);
         state.isAuthenticated = true;
         state.error = null;
         console.log('Redux - Login state updated:', { user: state.user, isAuthenticated: state.isAuthenticated });
@@ -134,7 +161,7 @@ const authSlice = createSlice({
       .addCase(register.fulfilled, (state, action) => {
         console.log('Redux - Register fulfilled with payload:', action.payload);
         state.isLoading = false;
-        state.user = action.payload.user;
+        state.user = normalizeUserData(action.payload.user);
         state.isAuthenticated = true;
         state.error = null;
         console.log('Redux - Register state updated:', { user: state.user, isAuthenticated: state.isAuthenticated });
@@ -163,7 +190,7 @@ const authSlice = createSlice({
       
       // Get current user
       .addCase(getCurrentUser.fulfilled, (state, action) => {
-        state.user = action.payload.user;
+        state.user = normalizeUserData(action.payload.user);
         state.isAuthenticated = true;
         state.isLoading = false;
       })

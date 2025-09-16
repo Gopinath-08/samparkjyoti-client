@@ -1,5 +1,6 @@
 import { createSlice, createAsyncThunk } from '@reduxjs/toolkit';
 import { jobService } from '../../services/jobService';
+import { filterJobsByLocation, normalizeLocation } from '../../utils/locationMatcher';
 
 interface Job {
   id: string;
@@ -48,6 +49,10 @@ interface JobsState {
   jobs: Job[];
   loading: boolean;
   error: string | null;
+  locationFiltered: boolean;
+  userLocation: string | null;
+  recommendations: boolean;
+  totalMatches: number;
   stats: {
     total: number;
     pending: number;
@@ -61,6 +66,10 @@ const initialState: JobsState = {
   jobs: [],
   loading: false,
   error: null,
+  locationFiltered: false,
+  userLocation: null,
+  recommendations: false,
+  totalMatches: 0,
   stats: {
     total: 0,
     pending: 0,
@@ -84,6 +93,44 @@ export const fetchJobs = createAsyncThunk(
     } catch (error: any) {
       console.error('Redux - fetchJobs error:', error);
       return rejectWithValue(error.response?.data?.message || 'Failed to fetch jobs');
+    }
+  }
+);
+
+export const fetchJobsForUser = createAsyncThunk(
+  'jobs/fetchJobsForUser',
+  async ({ userLocation, filters }: { userLocation?: string; filters?: any }, { rejectWithValue }) => {
+    try {
+      const response = await jobService.getJobsForUser(userLocation, filters);
+      console.log('Redux - fetchJobsForUser response:', response.data);
+      const jobs = response.data?.data?.jobs || response.data?.jobs || [];
+      const locationFiltered = response.data?.data?.locationFiltered || false;
+      const userLocationNormalized = response.data?.data?.userLocation;
+      
+      console.log('Redux - extracted jobs for user:', jobs.length, 'locationFiltered:', locationFiltered);
+      return { jobs, locationFiltered, userLocation: userLocationNormalized };
+    } catch (error: any) {
+      console.error('Redux - fetchJobsForUser error:', error);
+      return rejectWithValue(error.response?.data?.message || 'Failed to fetch jobs for user');
+    }
+  }
+);
+
+export const fetchLocationRecommendations = createAsyncThunk(
+  'jobs/fetchLocationRecommendations',
+  async ({ userLocation, limit = 10 }: { userLocation: string; limit?: number }, { rejectWithValue }) => {
+    try {
+      const response = await jobService.getLocationBasedRecommendations(userLocation, limit);
+      console.log('Redux - fetchLocationRecommendations response:', response.data);
+      const jobs = response.data?.data?.jobs || response.data?.jobs || [];
+      const totalMatches = response.data?.data?.totalMatches || 0;
+      const userLocationNormalized = response.data?.data?.userLocation;
+      
+      console.log('Redux - extracted location recommendations:', jobs.length, 'totalMatches:', totalMatches);
+      return { jobs, totalMatches, userLocation: userLocationNormalized, recommendations: true };
+    } catch (error: any) {
+      console.error('Redux - fetchLocationRecommendations error:', error);
+      return rejectWithValue(error.response?.data?.message || 'Failed to fetch location recommendations');
     }
   }
 );
@@ -118,6 +165,16 @@ const jobsSlice = createSlice({
   reducers: {
     clearError: (state) => {
       state.error = null;
+    },
+    setLocationFilter: (state, action) => {
+      state.locationFiltered = action.payload.locationFiltered;
+      state.userLocation = action.payload.userLocation;
+    },
+    clearLocationFilter: (state) => {
+      state.locationFiltered = false;
+      state.userLocation = null;
+      state.recommendations = false;
+      state.totalMatches = 0;
     },
   },
   extraReducers: (builder) => {
@@ -175,11 +232,83 @@ const jobsSlice = createSlice({
         if (job) {
           job.applications += 1;
         }
+      })
+      
+      // Fetch jobs for user with location filtering
+      .addCase(fetchJobsForUser.pending, (state) => {
+        state.loading = true;
+        state.error = null;
+      })
+      .addCase(fetchJobsForUser.fulfilled, (state, action) => {
+        state.loading = false;
+        const { jobs, locationFiltered, userLocation } = action.payload;
+        
+        // Map _id to id for frontend compatibility
+        const jobsWithId = jobs.map((job: any) => ({
+          ...job,
+          id: job._id || job.id
+        }));
+        
+        state.jobs = jobsWithId;
+        state.locationFiltered = locationFiltered;
+        state.userLocation = userLocation;
+        
+        // Update stats
+        state.stats = {
+          total: jobsWithId.length,
+          pending: jobsWithId.filter((job: Job) => job.status === 'pending').length,
+          approved: jobsWithId.filter((job: Job) => job.status === 'approved').length,
+          rejected: jobsWithId.filter((job: Job) => job.status === 'rejected').length,
+          underReview: jobsWithId.filter((job: Job) => job.status === 'under_review').length,
+        };
+        
+        console.log('Redux - Jobs for user loaded:', jobsWithId.length, 'locationFiltered:', locationFiltered);
+      })
+      .addCase(fetchJobsForUser.rejected, (state, action) => {
+        state.loading = false;
+        state.error = action.payload as string;
+      })
+      
+      // Fetch location-based recommendations
+      .addCase(fetchLocationRecommendations.pending, (state) => {
+        state.loading = true;
+        state.error = null;
+      })
+      .addCase(fetchLocationRecommendations.fulfilled, (state, action) => {
+        state.loading = false;
+        const { jobs, totalMatches, userLocation } = action.payload;
+        
+        // Map _id to id for frontend compatibility
+        const jobsWithId = jobs.map((job: any) => ({
+          ...job,
+          id: job._id || job.id
+        }));
+        
+        state.jobs = jobsWithId;
+        state.locationFiltered = true;
+        state.userLocation = userLocation;
+        state.recommendations = true;
+        state.totalMatches = totalMatches;
+        
+        // Update stats
+        state.stats = {
+          total: jobsWithId.length,
+          pending: jobsWithId.filter((job: Job) => job.status === 'pending').length,
+          approved: jobsWithId.filter((job: Job) => job.status === 'approved').length,
+          rejected: jobsWithId.filter((job: Job) => job.status === 'rejected').length,
+          underReview: jobsWithId.filter((job: Job) => job.status === 'under_review').length,
+        };
+        
+        console.log('Redux - Location recommendations loaded:', jobsWithId.length, 'totalMatches:', totalMatches);
+      })
+      .addCase(fetchLocationRecommendations.rejected, (state, action) => {
+        state.loading = false;
+        state.error = action.payload as string;
       });
   },
 });
 
-export const { clearError } = jobsSlice.actions;
+export const { clearError, setLocationFilter, clearLocationFilter } = jobsSlice.actions;
 export default jobsSlice.reducer;
 
 
