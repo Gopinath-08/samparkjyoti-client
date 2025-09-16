@@ -1,7 +1,8 @@
 import React, { useState, useEffect } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import { RootState, AppDispatch } from '../store/store';
-import { fetchProducts } from '../store/slices/productsSlice';
+import { fetchProducts, fetchLocationRecommendations, clearLocationFilter } from '../store/slices/productsSlice';
+import { useAuth } from '../contexts/AuthContext';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import {
   faSearch,
@@ -261,9 +262,31 @@ const EmptyDescription = styled.p`
   margin-bottom: 1rem;
 `;
 
+const LocationIndicator = styled.div`
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  background: linear-gradient(135deg, #E8F5E8 0%, #C8E6C9 100%);
+  color: #2E7D32;
+  padding: 0.75rem 1rem;
+  border-radius: 8px;
+  margin-bottom: 1.5rem;
+  font-weight: 500;
+  border-left: 4px solid #4CAF50;
+`;
+
 const MarketPage: React.FC = () => {
+  console.log('🏪 MarketPage component mounting...');
+  
   const dispatch = useDispatch<AppDispatch>();
-  const { products, loading, error } = useSelector((state: RootState) => state.products);
+  const { user } = useAuth();
+  const { products, loading, error, locationFiltered, userLocation, totalMatches } = useSelector((state: RootState) => state.products);
+  
+  console.log('🏪 MarketPage render - user:', user);
+  console.log('🏪 MarketPage render - user?.location:', user?.location);
+  console.log('🏪 MarketPage render - user?.roles:', user?.roles);
+  console.log('🏪 MarketPage render - user?.primaryRole:', user?.primaryRole);
+  console.log('🏪 MarketPage render - products state:', { products, loading, error, locationFiltered, userLocation, totalMatches });
   
   const [filters, setFilters] = useState({
     search: '',
@@ -273,9 +296,26 @@ const MarketPage: React.FC = () => {
     priceMax: ''
   });
 
+  // Debug useEffect to track component mounting
   useEffect(() => {
-    dispatch(fetchProducts());
-  }, [dispatch]);
+    console.log('🔄 MarketPage component mounted/updated');
+  });
+
+  useEffect(() => {
+    console.log('🔄 MarketPage useEffect triggered - user:', user);
+    console.log('🔄 MarketPage useEffect triggered - user?.location:', user?.location);
+    console.log('🔄 MarketPage useEffect triggered - user roles:', user?.roles);
+    console.log('🔄 MarketPage useEffect triggered - user primaryRole:', user?.primaryRole);
+    
+    // Use location-based fetching if user has a location
+    if (user?.location) {
+      console.log('🔄 MarketPage: User has location, dispatching fetchLocationRecommendations:', user.location);
+      dispatch(fetchLocationRecommendations({ userLocation: user.location, limit: 50 }));
+    } else {
+      console.log('🔄 MarketPage: User has no location, dispatching fetchProducts');
+      dispatch(fetchProducts());
+    }
+  }, [dispatch, user]);
 
   const handleFilterChange = (key: string, value: string) => {
     setFilters(prev => ({
@@ -291,13 +331,33 @@ const MarketPage: React.FC = () => {
       product.location.toLowerCase().includes(filters.search.toLowerCase());
     
     const matchesCategory = filters.category === '' || product.category === filters.category;
-    const matchesLocation = filters.location === '' || product.location.toLowerCase().includes(filters.location.toLowerCase());
+    
+    // If location-based matching is active, skip location filter to avoid conflicts
+    // The location matching already filtered products by location
+    const matchesLocation = locationFiltered ? true : (filters.location === '' || product.location.toLowerCase().includes(filters.location.toLowerCase()));
     
     const price = product.price;
     const matchesPriceMin = filters.priceMin === '' || price >= parseFloat(filters.priceMin);
     const matchesPriceMax = filters.priceMax === '' || price <= parseFloat(filters.priceMax);
 
-    return matchesSearch && matchesCategory && matchesLocation && matchesPriceMin && matchesPriceMax;
+    const matches = matchesSearch && matchesCategory && matchesLocation && matchesPriceMin && matchesPriceMax;
+    
+    console.log(`🔍 Product "${product.name}" filter check:`, {
+      product: { name: product.name, category: product.category, location: product.location, price: product.price },
+      filters,
+      locationFiltered,
+      matches: { matchesSearch, matchesCategory, matchesLocation, matchesPriceMin, matchesPriceMax },
+      finalMatch: matches
+    });
+
+    return matches;
+  });
+
+  console.log('📋 MarketPage: Filtered products result:', {
+    totalProducts: products.length,
+    filteredProducts: filteredProducts.length,
+    filters,
+    products: products.map(p => ({ name: p.name, location: p.location, price: p.price }))
   });
 
   const categories = ['vegetables', 'fruits', 'grains', 'dairy', 'spices', 'other'];
@@ -351,8 +411,15 @@ const MarketPage: React.FC = () => {
           <Select
             value={filters.location}
             onChange={(e) => handleFilterChange('location', e.target.value)}
+            disabled={locationFiltered}
+            style={{ 
+              opacity: locationFiltered ? 0.6 : 1,
+              cursor: locationFiltered ? 'not-allowed' : 'pointer'
+            }}
           >
-            <option value="">All Locations</option>
+            <option value="">
+              {locationFiltered ? `Location: ${userLocation} (Auto-filtered)` : 'All Locations'}
+            </option>
             <option value="sambalpur">Sambalpur</option>
             <option value="jharsuguda">Jharsuguda</option>
             <option value="bargarh">Bargarh</option>
@@ -385,6 +452,34 @@ const MarketPage: React.FC = () => {
           </Select>
         </FilterRow>
       </SearchSection>
+
+      {locationFiltered && userLocation && (
+        <LocationIndicator>
+          <FontAwesomeIcon icon={faMapMarkerAlt} />
+          <span>
+            Showing products near <strong>{userLocation}</strong>
+            {totalMatches > 0 && ` • ${totalMatches} location matches found`}
+          </span>
+          <button 
+            onClick={() => {
+              dispatch(fetchProducts());
+              dispatch(clearLocationFilter());
+            }}
+            style={{
+              marginLeft: '1rem',
+              padding: '0.25rem 0.75rem',
+              background: 'white',
+              border: '1px solid #4CAF50',
+              borderRadius: '4px',
+              color: '#4CAF50',
+              cursor: 'pointer',
+              fontSize: '0.8rem'
+            }}
+          >
+            Show All Products
+          </button>
+        </LocationIndicator>
+      )}
 
       {filteredProducts.length === 0 ? (
         <EmptyMessage>

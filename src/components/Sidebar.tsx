@@ -144,10 +144,21 @@ const Sidebar: React.FC = () => {
   const commonNavItems = [
     { to: '/home', icon: faHome, label: 'Home' },
     { to: '/jobs', icon: faBriefcase, label: 'Find Jobs' },
-    { to: '/market', icon: faStore, label: 'Market' },
     { to: '/ustad', icon: faHammer, label: 'Ustaad' },
     { to: '/profile', icon: faUser, label: 'Profile' },
   ];
+
+  // Regular user navigation items - not for agents
+  const getRegularUserNavItems = () => {
+    const items = [];
+
+    // Market - only for regular users (labour, farmer, employer), not agents
+    if (user && !permissions.canManageUsers) {
+      items.push({ to: '/market', icon: faStore, label: 'Market' });
+    }
+
+    return items;
+  };
 
   // Role-based navigation items
   const getRoleBasedNavItems = () => {
@@ -176,6 +187,7 @@ const Sidebar: React.FC = () => {
     return items;
   };
 
+  const regularUserNavItems = getRegularUserNavItems();
   const roleBasedNavItems = getRoleBasedNavItems();
 
   return (
@@ -189,6 +201,20 @@ const Sidebar: React.FC = () => {
           <NavLabel>{item.label}</NavLabel>
         </NavItem>
       ))}
+      
+      {regularUserNavItems.length > 0 && (
+        <>
+          <SectionTitle>Marketplace</SectionTitle>
+          {regularUserNavItems.map((item) => (
+            <NavItem key={item.to} to={item.to}>
+              <NavIcon>
+                <FontAwesomeIcon icon={item.icon} />
+              </NavIcon>
+              <NavLabel>{item.label}</NavLabel>
+            </NavItem>
+          ))}
+        </>
+      )}
       
       {roleBasedNavItems.length > 0 && (
         <>

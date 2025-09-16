@@ -37,9 +37,18 @@ const App: React.FC = () => {
                 
                 {/* Public viewing routes - everyone can access */}
                 <Route path="jobs" element={<JobsPage />} />
-                <Route path="market" element={<MarketPage />} />
                 <Route path="ustad" element={<UstadPage />} />
                 <Route path="profile" element={<ProfilePage />} />
+                
+                {/* Regular user routes - not for agents */}
+                <Route 
+                  path="market" 
+                  element={
+                    <RoleGuard requiredRoles={['labour', 'farmer', 'employer']}>
+                      <MarketPage />
+                    </RoleGuard>
+                  } 
+                />
                 
                 {/* Role-restricted routes */}
                 <Route 

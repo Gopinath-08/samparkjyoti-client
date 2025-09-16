@@ -239,6 +239,9 @@ const ProductPostingPage: React.FC = () => {
         available: parseFloat(formData.available) || 1,
         harvestDate: formData.harvestDate,
         features: formData.features.split(',').map(feature => feature.trim()).filter(feature => feature),
+        farmerName: formData.farmerName,
+        farmerPhone: formData.farmerPhone,
+        farmerEmail: formData.farmerEmail || undefined,
       };
 
       await productService.postProduct(productData);
