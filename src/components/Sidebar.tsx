@@ -154,7 +154,17 @@ const Sidebar: React.FC = () => {
 
     // Market - only for regular users (labour, farmer, employer), not agents
     if (user && !permissions.canManageUsers) {
-      items.push({ to: '/market', icon: faStore, label: 'Market' });
+      // Show different labels based on role
+      if (user.primaryRole === 'employer') {
+        items.push({ to: '/market', icon: faStore, label: 'Buy Product' });
+      } else if (user.primaryRole === 'farmer') {
+        // For farmers, show both Market (live prices) and Buy Product (farmer products)
+        items.push({ to: '/market-prices', icon: faStore, label: 'Market' });
+        items.push({ to: '/market', icon: faShoppingCart, label: 'Buy Product' });
+      } else {
+        // For other roles (labour, buyer), show Market
+        items.push({ to: '/market', icon: faStore, label: 'Market' });
+      }
     }
 
     return items;

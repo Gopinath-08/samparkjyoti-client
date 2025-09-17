@@ -3,6 +3,7 @@ import { useDispatch, useSelector } from 'react-redux';
 import { RootState, AppDispatch } from '../store/store';
 import { fetchProducts, fetchLocationRecommendations, clearLocationFilter } from '../store/slices/productsSlice';
 import { useAuth } from '../contexts/AuthContext';
+import { getPageSlogan } from '../utils/slogans';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import {
   faSearch,
@@ -36,6 +37,21 @@ const Title = styled.h1`
   font-size: 2rem;
   font-weight: 700;
   margin: 0;
+`;
+
+const OdiaTitle = styled.div`
+  color: #4CAF50;
+  font-size: 1.5rem;
+  font-weight: 600;
+  margin: 0.5rem 0 0 0;
+  font-family: 'Noto Sans Oriya', sans-serif;
+`;
+
+const EnglishSubtitle = styled.div`
+  color: #6b7280;
+  font-size: 1rem;
+  margin: 0.5rem 0;
+  font-style: italic;
 `;
 
 const SearchSection = styled.div`
@@ -280,6 +296,7 @@ const MarketPage: React.FC = () => {
   
   const dispatch = useDispatch<AppDispatch>();
   const { user } = useAuth();
+  const pageSlogan = getPageSlogan('market');
   const { products, loading, error, locationFiltered, userLocation, totalMatches } = useSelector((state: RootState) => state.products);
   
   console.log('🏪 MarketPage render - user:', user);
@@ -377,7 +394,7 @@ const MarketPage: React.FC = () => {
   return (
     <Container>
       <Header>
-        <Title>Agricultural Marketplace</Title>
+        <Title>{pageSlogan.odia}</Title>
       </Header>
 
       <SearchSection>

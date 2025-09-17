@@ -17,6 +17,8 @@ import ProductPostingPage from './pages/ProductPostingPage';
 import AgentDashboard from './pages/AgentDashboard';
 import CreateWorkerPage from './pages/CreateWorkerPage';
 import UstadPage from './pages/UstadPage';
+import LogisticsPage from './pages/LogisticsPage';
+import MarketPricesPage from './pages/MarketPricesPage';
 import './App.css';
 
 const App: React.FC = () => {
@@ -44,8 +46,16 @@ const App: React.FC = () => {
                 <Route 
                   path="market" 
                   element={
-                    <RoleGuard requiredRoles={['labour', 'farmer', 'employer']}>
+                    <RoleGuard requiredRoles={['labour', 'farmer', 'employer', 'buyer']}>
                       <MarketPage />
+                    </RoleGuard>
+                  } 
+                />
+                <Route 
+                  path="market-prices" 
+                  element={
+                    <RoleGuard requiredRoles={['farmer']}>
+                      <MarketPricesPage />
                     </RoleGuard>
                   } 
                 />
@@ -80,6 +90,14 @@ const App: React.FC = () => {
                   element={
                     <RoleGuard requiredPermissions={['canCreateWorkers']}>
                       <CreateWorkerPage />
+                    </RoleGuard>
+                  } 
+                />
+                <Route 
+                  path="logistics" 
+                  element={
+                    <RoleGuard requiredRoles={['employer']}>
+                      <LogisticsPage />
                     </RoleGuard>
                   } 
                 />

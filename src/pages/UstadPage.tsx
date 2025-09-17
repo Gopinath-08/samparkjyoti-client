@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import { useAuth } from '../contexts/AuthContext';
+import { getPageSlogan } from '../utils/slogans';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { 
   faHammer, 
@@ -66,6 +67,24 @@ const Subtitle = styled.p`
   opacity: 0.9;
   margin: 0;
   font-weight: 300;
+`;
+
+const OdiaTitle = styled.div`
+  color: #1976D2;
+  font-size: 1.5rem;
+  font-weight: 600;
+  margin: 0.5rem 0 0 0;
+  font-family: 'Noto Sans Oriya', sans-serif;
+  text-align: center;
+`;
+
+const OdiaSubtitle = styled.div`
+  color: #6b7280;
+  font-size: 1rem;
+  margin: 0.5rem 0 0 0;
+  font-family: 'Noto Sans Oriya', sans-serif;
+  text-align: center;
+  font-style: italic;
 `;
 
 const StatsContainer = styled.div`
@@ -309,6 +328,7 @@ const PrimaryButton = styled.button`
 const UstadPage: React.FC = () => {
   const { user } = useAuth();
   const [showShareModal, setShowShareModal] = useState(false);
+  const pageSlogan = getPageSlogan('ustad');
 
   const handleShareKnowledge = () => {
     toast.success('Knowledge sharing feature coming soon!');
@@ -392,10 +412,12 @@ const UstadPage: React.FC = () => {
       <Header>
         <HeaderContent>
           <FontAwesomeIcon icon={faHammer} size="3x" style={{ marginBottom: '1rem' }} />
-          <Title>Ustaad - Expert Hub</Title>
+          <Title>{pageSlogan.odia} - Expert Hub</Title>
+          <OdiaTitle>{pageSlogan.odia}</OdiaTitle>
           <Subtitle>
-            Learn from experts, share your knowledge, and grow together with the community
+            {pageSlogan.odia}
           </Subtitle>
+          <OdiaSubtitle>{pageSlogan.odia}</OdiaSubtitle>
         </HeaderContent>
       </Header>
 

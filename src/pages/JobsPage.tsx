@@ -40,6 +40,23 @@ const Title = styled.h1`
   margin: 0;
 `;
 
+const OdiaTitle = styled.div`
+  color: #1565C0;
+  font-size: 1.5rem;
+  font-weight: 600;
+  margin: 0.5rem 0 0 0;
+  font-family: 'Noto Sans Oriya', sans-serif;
+`;
+
+const OdiaSlogan = styled.div`
+  color: #1976D2;
+  font-size: 1.2rem;
+  font-weight: 600;
+  margin: 0.5rem 0;
+  font-family: 'Noto Sans Oriya', sans-serif;
+  text-align: center;
+`;
+
 const Subtitle = styled.p`
   color: #64748b;
   font-size: 1.1rem;
@@ -538,6 +555,7 @@ const JobsPage: React.FC = () => {
               : 'All Approved Jobs'
             }
           </Title>
+          <OdiaSlogan>ସମ୍ପର୍କ ଜ୍ୟୋତି ଆପଣଙ୍କ ସେବାରେ</OdiaSlogan>
           <Subtitle>
             {locationFiltered && showLocationFilter ? (
               <>
