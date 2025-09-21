@@ -1,18 +1,4 @@
 import React, { useState } from 'react';
-import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-import {
-  faUser,
-  faEnvelope,
-  faPhone,
-  faMapMarkerAlt,
-  faBriefcase,
-  faCog,
-  faCar,
-  faIdCard,
-  faDumbbell,
-  faHeartbeat,
-  faFileAlt
-} from '@fortawesome/free-solid-svg-icons';
 import styled from 'styled-components';
 import toast from 'react-hot-toast';
 

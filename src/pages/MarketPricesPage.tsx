@@ -314,3 +314,6 @@ const MarketPricesPage: React.FC = () => {
 };
 
 export default MarketPricesPage;
+
+
+

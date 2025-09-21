@@ -1,7 +1,6 @@
 import React, { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
-import { useDispatch } from 'react-redux';
-import { AppDispatch } from '../store/store';
+import { useAppDispatch } from '../store/store';
 import { register } from '../store/slices/authSlice';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import {
@@ -301,7 +300,7 @@ const ErrorMessage = styled.div`
 `;
 
 const RegisterPage: React.FC = () => {
-  const dispatch = useDispatch<AppDispatch>();
+  const dispatch = useAppDispatch();
   const navigate = useNavigate();
   const [step, setStep] = useState(1);
   const [formData, setFormData] = useState({
@@ -336,7 +335,6 @@ const RegisterPage: React.FC = () => {
     { id: 'labour', label: 'Labour', icon: faBriefcase, description: 'Seeking employment opportunities' },
     { id: 'employer', label: 'Employer', icon: faBuilding, description: 'Offering work opportunities' },
     { id: 'farmer', label: 'Farmer', icon: faLeaf, description: 'Agricultural producer' },
-    { id: 'buyer', label: 'Buyer', icon: faShoppingCart, description: 'Purchasing agricultural products' },
   ];
 
   const workRoles = [

@@ -1,8 +1,7 @@
 import React from 'react';
 import { Navigate } from 'react-router-dom';
-import { useSelector } from 'react-redux';
-import { RootState } from '../store/store';
-import { getRolePermissions, hasRole, hasAnyRole, isAgent } from '../utils/roleUtils';
+import { useAppSelector } from '../store/store';
+import { getRolePermissions, hasAnyRole } from '../utils/roleUtils';
 import styled from 'styled-components';
 
 interface RoleGuardProps {
@@ -65,7 +64,7 @@ const RoleGuard: React.FC<RoleGuardProps> = ({
   fallbackPath = '/home',
   showAccessDenied = true,
 }) => {
-  const { user, isAuthenticated } = useSelector((state: RootState) => state.auth);
+  const { user, isAuthenticated } = useAppSelector((state) => state.auth);
 
   // If not authenticated, redirect to login
   if (!isAuthenticated || !user) {
@@ -126,6 +125,9 @@ const RoleGuard: React.FC<RoleGuardProps> = ({
 };
 
 export default RoleGuard;
+
+
+
 
 
 

@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React from 'react';
 import { Outlet, Navigate } from 'react-router-dom';
 import { useAuth } from '../contexts/AuthContext';
 import Navbar from './Navbar';
@@ -47,24 +47,8 @@ const ContentArea = styled.div`
   }
 `;
 
-const MobileOverlay = styled.div<{ isOpen: boolean }>`
-  position: fixed;
-  top: 0;
-  left: 0;
-  right: 0;
-  bottom: 0;
-  background: rgba(0, 0, 0, 0.5);
-  z-index: 1000;
-  display: ${props => props.isOpen ? 'block' : 'none'};
-  
-  @media (min-width: 769px) {
-    display: none;
-  }
-`;
-
 const Layout: React.FC = () => {
   const { isAuthenticated, isLoading, user } = useAuth();
-  const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
 
   console.log('Layout - isAuthenticated:', isAuthenticated);
   console.log('Layout - isLoading:', isLoading);

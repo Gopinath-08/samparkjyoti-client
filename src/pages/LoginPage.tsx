@@ -1,7 +1,6 @@
 import React, { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
-import { useDispatch } from 'react-redux';
-import { AppDispatch } from '../store/store';
+import { useAppDispatch } from '../store/store';
 import { login } from '../store/slices/authSlice';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faEye, faEyeSlash, faUser, faLock } from '@fortawesome/free-solid-svg-icons';
@@ -150,7 +149,7 @@ const ErrorMessage = styled.div`
 `;
 
 const LoginPage: React.FC = () => {
-  const dispatch = useDispatch<AppDispatch>();
+  const dispatch = useAppDispatch();
   const navigate = useNavigate();
   const [formData, setFormData] = useState({
     email: '',

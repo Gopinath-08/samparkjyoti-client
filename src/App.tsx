@@ -8,17 +8,17 @@ import Layout from './components/Layout';
 import RoleGuard from './components/RoleGuard';
 import HomePage from './pages/HomePage';
 import JobsPage from './pages/JobsPage';
-import MarketPage from './pages/MarketPage';
 import ProfilePage from './pages/ProfilePage';
 import LoginPage from './pages/LoginPage';
 import RegisterPage from './pages/RegisterPage';
 import JobPostingPage from './pages/JobPostingPage';
-import ProductPostingPage from './pages/ProductPostingPage';
 import AgentDashboard from './pages/AgentDashboard';
 import CreateWorkerPage from './pages/CreateWorkerPage';
 import UstadPage from './pages/UstadPage';
 import LogisticsPage from './pages/LogisticsPage';
 import MarketPricesPage from './pages/MarketPricesPage';
+import VendorsPage from './pages/VendorsPage';
+import VendorDetailsPage from './pages/VendorDetailsPage';
 import './App.css';
 
 const App: React.FC = () => {
@@ -42,15 +42,16 @@ const App: React.FC = () => {
                 <Route path="ustad" element={<UstadPage />} />
                 <Route path="profile" element={<ProfilePage />} />
                 
-                {/* Regular user routes - not for agents */}
+                {/* Farmer-only routes - only accessible if user is farmer */}
                 <Route 
-                  path="market" 
-                  element={
-                    <RoleGuard requiredRoles={['labour', 'farmer', 'employer', 'buyer']}>
-                      <MarketPage />
-                    </RoleGuard>
-                  } 
+                  path="vendors" 
+                  element={<VendorsPage />} 
                 />
+                <Route 
+                  path="vendors/:id" 
+                  element={<VendorDetailsPage />} 
+                />
+                
                 <Route 
                   path="market-prices" 
                   element={
@@ -66,14 +67,6 @@ const App: React.FC = () => {
                   element={
                     <RoleGuard requiredPermissions={['canPostJobs']}>
                       <JobPostingPage />
-                    </RoleGuard>
-                  } 
-                />
-                <Route 
-                  path="sell-product" 
-                  element={
-                    <RoleGuard requiredPermissions={['canPostProducts']}>
-                      <ProductPostingPage />
                     </RoleGuard>
                   } 
                 />

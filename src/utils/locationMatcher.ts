@@ -339,37 +339,5 @@ export function getLocationBasedRecommendations(jobs: any[], userLocation: strin
   return locationFilteredJobs.slice(0, limit);
 }
 
-export function filterProductsByLocation(products: any[], userLocation: string): any[] {
-  if (!userLocation || !products || products.length === 0) {
-    return products || [];
-  }
-
-  const normalizedUserLocation = normalizeLocation(userLocation);
-  
-  if (process.env.NODE_ENV === 'development') {
-    console.log(`🔍 Filtering ${products.length} products for user location: "${userLocation}" (normalized: "${normalizedUserLocation}")`);
-  }
-
-  const filteredProducts = products.map(product => {
-    const isMatch = locationsMatch(product.location, userLocation);
-    const locationScore = isMatch ? 100 : 0; // Simple scoring for now
-    
-    return {
-      ...product,
-      locationMatch: isMatch,
-      locationScore: locationScore,
-      normalizedLocation: normalizeLocation(product.location)
-    };
-  }).filter(product => product.locationMatch);
-
-  if (process.env.NODE_ENV === 'development') {
-    console.log(`✅ Found ${filteredProducts.length} location-matched products out of ${products.length} total products`);
-    filteredProducts.forEach(product => {
-      console.log(`  📍 "${product.location}" matches "${userLocation}" (score: ${product.locationScore})`);
-    });
-  }
-
-  return filteredProducts;
-}
 
 export { locationMap, locationVariations };

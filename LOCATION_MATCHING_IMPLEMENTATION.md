@@ -118,3 +118,6 @@ const filteredJobs = filterJobsByLocation(jobs, userLocation);
 - **Analytics**: Track location matching effectiveness
 
 
+
+
+

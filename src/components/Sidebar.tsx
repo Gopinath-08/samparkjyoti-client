@@ -11,9 +11,7 @@ import {
   faPlus,
   faUsers,
   faTachometerAlt,
-  faHammer,
-  faShoppingCart,
-  faUserTie
+  faHammer
 } from '@fortawesome/free-solid-svg-icons';
 import styled from 'styled-components';
 
@@ -152,19 +150,10 @@ const Sidebar: React.FC = () => {
   const getRegularUserNavItems = () => {
     const items = [];
 
-    // Market - only for regular users (labour, farmer, employer), not agents
-    if (user && !permissions.canManageUsers) {
-      // Show different labels based on role
-      if (user.primaryRole === 'employer') {
-        items.push({ to: '/market', icon: faStore, label: 'Buy Product' });
-      } else if (user.primaryRole === 'farmer') {
-        // For farmers, show both Market (live prices) and Buy Product (farmer products)
-        items.push({ to: '/market-prices', icon: faStore, label: 'Market' });
-        items.push({ to: '/market', icon: faShoppingCart, label: 'Buy Product' });
-      } else {
-        // For other roles (labour, buyer), show Market
-        items.push({ to: '/market', icon: faStore, label: 'Market' });
-      }
+    // Farmer-specific items
+    if (user && user.primaryRole === 'farmer') {
+      items.push({ to: '/vendors', icon: faStore, label: 'Find Vendors' });
+      items.push({ to: '/market-prices', icon: faStore, label: 'Market Prices' });
     }
 
     return items;
@@ -179,10 +168,6 @@ const Sidebar: React.FC = () => {
       items.push({ to: '/post-job', icon: faPlus, label: 'Post Job' });
     }
 
-    // Product posting - only farmers
-    if (permissions.canPostProducts) {
-      items.push({ to: '/sell-product', icon: faHammer, label: 'Sell Product' });
-    }
 
     // Worker creation - only agents
     if (permissions.canCreateWorkers) {

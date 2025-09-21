@@ -1,7 +1,6 @@
 import React, { createContext, useContext, useEffect, useState } from 'react';
-import { useDispatch, useSelector } from 'react-redux';
-import { RootState, AppDispatch } from '../store/store';
-import { getCurrentUser, login, register, logout, setUser } from '../store/slices/authSlice';
+import { useAppDispatch, useAppSelector } from '../store/store';
+import { getCurrentUser, login, register, logout } from '../store/slices/authSlice';
 import { useAuthPersistence } from '../hooks/useAuthPersistence';
 
 interface AuthContextType {
@@ -28,8 +27,8 @@ interface AuthProviderProps {
 }
 
 export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
-  const dispatch = useDispatch<AppDispatch>();
-  const { user, isAuthenticated, isLoading } = useSelector((state: RootState) => state.auth);
+  const dispatch = useAppDispatch();
+  const { user, isAuthenticated, isLoading } = useAppSelector((state) => state.auth);
   const { isInitialized } = useAuthPersistence();
   const [hasToken, setHasToken] = useState(false);
 

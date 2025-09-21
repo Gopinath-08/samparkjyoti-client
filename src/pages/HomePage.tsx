@@ -1,18 +1,14 @@
 import React from 'react';
 import { useAuth } from '../contexts/AuthContext';
-import { getRolePermissions, getRoleDisplayName } from '../utils/roleUtils';
+import { getRolePermissions } from '../utils/roleUtils';
 import { getRoleSlogan } from '../utils/slogans';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import {
   faBriefcase,
   faStore,
-  faUser,
   faPlus,
-  faShoppingCart,
-  faLeaf,
   faUsers,
   faTachometerAlt,
-  faHammer,
   faTruck
 } from '@fortawesome/free-solid-svg-icons';
 import styled from 'styled-components';
@@ -40,26 +36,6 @@ const WelcomeTitle = styled.h1`
   margin: 0 0 1rem 0;
 `;
 
-const WelcomeSubtitle = styled.p`
-  font-size: 1.2rem;
-  margin: 0;
-  opacity: 0.9;
-`;
-
-const OdiaSlogan = styled.div`
-  font-size: 1.5rem;
-  font-weight: 600;
-  margin: 1rem 0;
-  color: #fff;
-  font-family: 'Noto Sans Oriya', sans-serif;
-`;
-
-const EnglishTranslation = styled.div`
-  font-size: 1rem;
-  margin: 0.5rem 0;
-  opacity: 0.8;
-  font-style: italic;
-`;
 
 const QuickActionsGrid = styled.div`
   display: grid;
@@ -169,43 +145,26 @@ const HomePage: React.FC = () => {
       color: '#1976D2'
     });
 
-    // Market access for regular users
-    if (user && !permissions.canManageUsers) {
-      if (user.primaryRole === 'farmer') {
-        // For farmers, show both Market (live prices) and Buy Product (farmer products)
-        actions.push({
-          to: '/market-prices',
-          icon: faStore,
-          title: 'Market',
-          description: 'View live market prices for agricultural products',
-          color: '#4CAF50'
-        });
-        actions.push({
-          to: '/market',
-          icon: faShoppingCart,
-          title: 'Buy Product',
-          description: 'Browse and purchase agricultural products',
-          color: '#FF9800'
-        });
-      } else if (user.primaryRole === 'employer') {
-        // For employers, show Buy Product
-        actions.push({
-          to: '/market',
-          icon: faStore,
-          title: 'Buy Product',
-          description: 'Browse and purchase agricultural products',
-          color: '#4CAF50'
-        });
-      } else {
-        // For other roles (labour, buyer), show Marketplace
-        actions.push({
-          to: '/market',
-          icon: faStore,
-          title: 'Marketplace',
-          description: 'Browse and purchase agricultural products',
-          color: '#4CAF50'
-        });
-      }
+    // Vendor access only for farmers
+    if (user && user.primaryRole === 'farmer') {
+      actions.push({
+        to: '/vendors',
+        icon: faStore,
+        title: 'Find Vendors',
+        description: 'Connect with verified vendors in your area',
+        color: '#FF9800'
+      });
+    }
+
+    // Market prices for farmers only
+    if (user && user.primaryRole === 'farmer') {
+      actions.push({
+        to: '/market-prices',
+        icon: faStore,
+        title: 'Market Prices',
+        description: 'View live market prices',
+        color: '#4CAF50'
+      });
     }
 
     // Role-specific actions
@@ -230,15 +189,6 @@ const HomePage: React.FC = () => {
       });
     }
 
-    if (permissions.canPostProducts) {
-      actions.push({
-        to: '/sell-product',
-        icon: faLeaf,
-        title: 'Sell Product',
-        description: 'List your agricultural products for sale',
-        color: '#4CAF50'
-      });
-    }
 
     if (permissions.canCreateWorkers) {
       actions.push({
@@ -294,7 +244,7 @@ const HomePage: React.FC = () => {
           </StatItem>
           <StatItem>
             <StatNumber>567</StatNumber>
-            <StatLabel>Products Listed</StatLabel>
+            <StatLabel>Verified Vendors</StatLabel>
           </StatItem>
           <StatItem>
             <StatNumber>890</StatNumber>

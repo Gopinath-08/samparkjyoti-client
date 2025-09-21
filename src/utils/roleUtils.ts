@@ -13,16 +13,13 @@ interface User {
   preferredLanguage?: string;
 }
 
-export type UserRole = 'labour' | 'farmer' | 'employer' | 'buyer' | 'agent';
+export type UserRole = 'labour' | 'farmer' | 'employer' | 'agent';
 
 export interface RolePermissions {
   canPostJobs: boolean;
-  canPostProducts: boolean;
   canCreateWorkers: boolean;
   canApplyJobs: boolean;
-  canBuyProducts: boolean;
   canViewJobs: boolean;
-  canViewProducts: boolean;
   canViewWorkers: boolean;
   canManageWorkers: boolean;
   canViewAnalytics: boolean;
@@ -33,12 +30,9 @@ export const getRolePermissions = (user: User | null): RolePermissions => {
   if (!user) {
     return {
       canPostJobs: false,
-      canPostProducts: false,
       canCreateWorkers: false,
       canApplyJobs: false,
-      canBuyProducts: false,
       canViewJobs: false,
-      canViewProducts: false,
       canViewWorkers: false,
       canManageWorkers: false,
       canViewAnalytics: false,
@@ -54,9 +48,6 @@ export const getRolePermissions = (user: User | null): RolePermissions => {
     // Job posting - Only employers can post jobs
     canPostJobs: roles.includes('employer') || primaryRole === 'employer',
     
-    // Product posting - Only farmers can post products
-    canPostProducts: roles.includes('farmer') || primaryRole === 'farmer',
-    
     // Worker creation - Only agents can create workers
     canCreateWorkers: isAgent,
     
@@ -64,13 +55,8 @@ export const getRolePermissions = (user: User | null): RolePermissions => {
     canApplyJobs: roles.includes('labour') || roles.includes('farmer') || 
                   primaryRole === 'labour' || primaryRole === 'farmer',
     
-    // Product buying - Buyers and farmers can buy products
-    canBuyProducts: roles.includes('buyer') || roles.includes('farmer') || 
-                   primaryRole === 'buyer' || primaryRole === 'farmer',
-    
-    // Viewing permissions - Most roles can view jobs and products
-    canViewJobs: true, // Everyone can view jobs
-    canViewProducts: true, // Everyone can view products
+    // Viewing permissions - Everyone can view jobs
+    canViewJobs: true,
     
     // Worker viewing - Labour, farmers, and agents can view workers
     canViewWorkers: roles.includes('labour') || roles.includes('farmer') || 
@@ -106,7 +92,6 @@ export const getRoleDisplayName = (role: UserRole): string => {
     labour: 'Labour',
     farmer: 'Farmer',
     employer: 'Employer',
-    buyer: 'Buyer',
     agent: 'Agent',
   };
   return roleNames[role] || role;
@@ -115,9 +100,8 @@ export const getRoleDisplayName = (role: UserRole): string => {
 export const getRoleDescription = (role: UserRole): string => {
   const descriptions: Record<UserRole, string> = {
     labour: 'Find and apply for job opportunities',
-    farmer: 'Sell agricultural products and find buyers',
+    farmer: 'View market prices and find job opportunities',
     employer: 'Post job opportunities and hire workers',
-    buyer: 'Purchase agricultural products from farmers',
     agent: 'Manage workers and facilitate connections',
   };
   return descriptions[role] || '';

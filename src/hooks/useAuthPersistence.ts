@@ -1,9 +1,9 @@
 import { useEffect, useState } from 'react';
-import { useDispatch } from 'react-redux';
+import { useAppDispatch } from '../store/store';
 import { setUser } from '../store/slices/authSlice';
 
 export const useAuthPersistence = () => {
-  const dispatch = useDispatch();
+  const dispatch = useAppDispatch();
   const [isInitialized, setIsInitialized] = useState(false);
 
   useEffect(() => {

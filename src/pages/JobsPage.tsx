@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import { RootState, AppDispatch } from '../store/store';
-import { fetchJobs, fetchJobsForUser, fetchLocationRecommendations, clearLocationFilter } from '../store/slices/jobsSlice';
+import { fetchJobs, fetchLocationRecommendations, clearLocationFilter } from '../store/slices/jobsSlice';
 import { useAuth } from '../contexts/AuthContext';
 import { locationsMatch } from '../utils/locationMatcher';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
@@ -9,12 +9,9 @@ import {
   faMapMarkerAlt,
   faClock,
   faBriefcase,
-  faRupeeSign,
   faUser,
-  faEye,
   faPhone,
   faEnvelope,
-  faStar,
   faCheckCircle,
   faLocationArrow
 } from '@fortawesome/free-solid-svg-icons';
@@ -40,92 +37,11 @@ const Title = styled.h1`
   margin: 0;
 `;
 
-const OdiaTitle = styled.div`
-  color: #1565C0;
-  font-size: 1.5rem;
-  font-weight: 600;
-  margin: 0.5rem 0 0 0;
-  font-family: 'Noto Sans Oriya', sans-serif;
-`;
-
-const OdiaSlogan = styled.div`
-  color: #1976D2;
-  font-size: 1.2rem;
-  font-weight: 600;
-  margin: 0.5rem 0;
-  font-family: 'Noto Sans Oriya', sans-serif;
-  text-align: center;
-`;
-
 const Subtitle = styled.p`
   color: #64748b;
   font-size: 1.1rem;
   margin: 0.5rem 0 0 0;
   font-weight: 400;
-`;
-
-const SearchSection = styled.div`
-  background: white;
-  padding: 1.5rem;
-  border-radius: 12px;
-  box-shadow: 0 2px 8px rgba(0,0,0,0.1);
-  margin-bottom: 2rem;
-`;
-
-const SearchRow = styled.div`
-  display: flex;
-  gap: 1rem;
-  margin-bottom: 1rem;
-  flex-wrap: wrap;
-`;
-
-const SearchInput = styled.input`
-  flex: 1;
-  min-width: 200px;
-  padding: 0.75rem 1rem 0.75rem 3rem;
-  border: 2px solid #e5e7eb;
-  border-radius: 8px;
-  font-size: 1rem;
-  transition: border-color 0.2s;
-
-  &:focus {
-    outline: none;
-    border-color: #1976D2;
-  }
-`;
-
-const SearchIcon = styled.div`
-  position: absolute;
-  left: 1rem;
-  top: 50%;
-  transform: translateY(-50%);
-  color: #666;
-`;
-
-const SearchGroup = styled.div`
-  position: relative;
-  flex: 1;
-  min-width: 200px;
-`;
-
-const Select = styled.select`
-  padding: 0.75rem 1rem;
-  border: 2px solid #e5e7eb;
-  border-radius: 8px;
-  font-size: 1rem;
-  background: white;
-  min-width: 150px;
-
-  &:focus {
-    outline: none;
-    border-color: #1976D2;
-  }
-`;
-
-const FilterRow = styled.div`
-  display: flex;
-  gap: 1rem;
-  flex-wrap: wrap;
 `;
 
 const JobsGrid = styled.div`
@@ -466,7 +382,7 @@ interface JobWithLocationMatch {
 const JobsPage: React.FC = () => {
   const dispatch = useDispatch<AppDispatch>();
   const { user } = useAuth();
-  const { jobs, loading, error, locationFiltered, userLocation, totalMatches } = useSelector((state: RootState) => state.jobs);
+  const { jobs, loading, locationFiltered, userLocation, totalMatches } = useSelector((state: RootState) => state.jobs);
   
   const [selectedCategory, setSelectedCategory] = useState('');
   const [showLocationFilter, setShowLocationFilter] = useState(true);
@@ -555,7 +471,9 @@ const JobsPage: React.FC = () => {
               : 'All Approved Jobs'
             }
           </Title>
-          <OdiaSlogan>ସମ୍ପର୍କ ଜ୍ୟୋତି ଆପଣଙ୍କ ସେବାରେ</OdiaSlogan>
+          <div style={{ color: '#1976D2', fontSize: '1.2rem', fontWeight: '600', margin: '0.5rem 0', fontFamily: "'Noto Sans Oriya', sans-serif", textAlign: 'center' }}>
+            ସମ୍ପର୍କ ଜ୍ୟୋତି ଆପଣଙ୍କ ସେବାରେ
+          </div>
           <Subtitle>
             {locationFiltered && showLocationFilter ? (
               <>

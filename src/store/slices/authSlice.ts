@@ -1,42 +1,5 @@
-import { createSlice, createAsyncThunk, PayloadAction } from '@reduxjs/toolkit';
-import { authService } from '../../services/authService';
-
-// Utility function to normalize user data from backend
-const normalizeUserData = (userData: any) => {
-  if (!userData) return userData;
-  
-  const normalized = { ...userData };
-  
-  // Map _id to id for frontend compatibility
-  if (normalized._id) {
-    normalized.id = normalized._id;
-    delete normalized._id;
-  }
-  
-  // Ensure isAgent is set based on roles
-  if (normalized.roles) {
-    normalized.isAgent = normalized.roles.includes('agent');
-  }
-  
-  // Set default values
-  normalized.profileComplete = normalized.profileComplete ?? true;
-  
-  return normalized;
-};
-
-interface User {
-  id: string;
-  name: string;
-  email: string;
-  phone: string;
-  location?: string;
-  isAgent?: boolean;
-  profileComplete?: boolean;
-  roles?: string[];
-  primaryRole?: string;
-  languages?: string[];
-  preferredLanguage?: string;
-}
+import { createSlice, createAsyncThunk } from '@reduxjs/toolkit';
+import { authService, LoginCredentials, RegisterData, User } from '../../services/authService';
 
 interface AuthState {
   user: User | null;
@@ -55,19 +18,21 @@ const initialState: AuthState = {
 // Async thunks
 export const login = createAsyncThunk(
   'auth/login',
-  async (credentials: { email: string; password: string }, { rejectWithValue }) => {
+  async (credentials: LoginCredentials, { rejectWithValue }) => {
     try {
-      console.log('Redux - Login thunk called with:', credentials);
       const response = await authService.login(credentials);
-      console.log('Redux - Login response received:', response.data);
-      
-      // Backend returns: { status: "success", data: { user: {...}, token: "..." } }
       const responseData = response.data.data || response.data;
-      console.log('Redux - Extracted data:', responseData);
       
-      return responseData;
+      // Map _id to id for frontend compatibility
+      const userData = { ...responseData.user };
+      if (userData._id) {
+        userData.id = userData._id;
+        delete userData._id;
+      }
+      
+      return { user: userData, token: responseData.token };
     } catch (error: any) {
-      console.error('Redux - Login error:', error);
+      console.error('Auth slice - Login error:', error);
       return rejectWithValue(error.response?.data?.message || 'Login failed');
     }
   }
@@ -75,19 +40,21 @@ export const login = createAsyncThunk(
 
 export const register = createAsyncThunk(
   'auth/register',
-  async (userData: { name: string; email: string; password: string; phone: string; isAgent?: boolean }, { rejectWithValue }) => {
+  async (userData: RegisterData, { rejectWithValue }) => {
     try {
-      console.log('Redux - Register thunk called with:', userData);
       const response = await authService.register(userData);
-      console.log('Redux - Register response received:', response.data);
-      
-      // Backend returns: { status: "success", data: { user: {...}, token: "..." } }
       const responseData = response.data.data || response.data;
-      console.log('Redux - Extracted data:', responseData);
       
-      return responseData;
+      // Map _id to id for frontend compatibility
+      const user = { ...responseData.user };
+      if (user._id) {
+        user.id = user._id;
+        delete user._id;
+      }
+      
+      return { user, token: responseData.token };
     } catch (error: any) {
-      console.error('Redux - Register error:', error);
+      console.error('Auth slice - Register error:', error);
       return rejectWithValue(error.response?.data?.message || 'Registration failed');
     }
   }
@@ -100,9 +67,8 @@ export const logout = createAsyncThunk(
       await authService.logout();
       return null;
     } catch (error: any) {
-      // Even if logout fails, we should still clear the state
-      console.warn('Logout error, but clearing state:', error);
-      return null;
+      console.error('Auth slice - Logout error:', error);
+      return rejectWithValue(error.message || 'Logout failed');
     }
   }
 );
@@ -112,10 +78,30 @@ export const getCurrentUser = createAsyncThunk(
   async (_, { rejectWithValue }) => {
     try {
       const response = await authService.getCurrentUser();
-      return response.data;
+      const responseData = response.data.data || response.data;
+      
+      // Extract user from the response data
+      const userData = responseData.user || responseData;
+      
+      // Map _id to id for frontend compatibility
+      const user = { ...userData };
+      if (user._id) {
+        user.id = user._id;
+        delete user._id;
+      }
+      
+      return user;
     } catch (error: any) {
-      return rejectWithValue(error.response?.data?.message || 'Failed to get user');
+      console.error('Auth slice - Get current user error:', error);
+      return rejectWithValue(error.response?.data?.message || 'Failed to get current user');
     }
+  }
+);
+
+export const setUser = createAsyncThunk(
+  'auth/setUser',
+  async (user: User) => {
+    return user;
   }
 );
 
@@ -126,9 +112,11 @@ const authSlice = createSlice({
     clearError: (state) => {
       state.error = null;
     },
-    setUser: (state, action: PayloadAction<User>) => {
-      state.user = normalizeUserData(action.payload);
-      state.isAuthenticated = true;
+    clearAuth: (state) => {
+      state.user = null;
+      state.isAuthenticated = false;
+      state.isLoading = false;
+      state.error = null;
     },
   },
   extraReducers: (builder) => {
@@ -139,12 +127,10 @@ const authSlice = createSlice({
         state.error = null;
       })
       .addCase(login.fulfilled, (state, action) => {
-        console.log('Redux - Login fulfilled with payload:', action.payload);
         state.isLoading = false;
-        state.user = normalizeUserData(action.payload.user);
+        state.user = action.payload.user;
         state.isAuthenticated = true;
         state.error = null;
-        console.log('Redux - Login state updated:', { user: state.user, isAuthenticated: state.isAuthenticated });
       })
       .addCase(login.rejected, (state, action) => {
         state.isLoading = false;
@@ -159,12 +145,10 @@ const authSlice = createSlice({
         state.error = null;
       })
       .addCase(register.fulfilled, (state, action) => {
-        console.log('Redux - Register fulfilled with payload:', action.payload);
         state.isLoading = false;
-        state.user = normalizeUserData(action.payload.user);
+        state.user = action.payload.user;
         state.isAuthenticated = true;
         state.error = null;
-        console.log('Redux - Register state updated:', { user: state.user, isAuthenticated: state.isAuthenticated });
       })
       .addCase(register.rejected, (state, action) => {
         state.isLoading = false;
@@ -174,35 +158,51 @@ const authSlice = createSlice({
       })
       
       // Logout
-      .addCase(logout.fulfilled, (state) => {
-        state.user = null;
-        state.isAuthenticated = false;
-        state.error = null;
-        state.isLoading = false;
+      .addCase(logout.pending, (state) => {
+        state.isLoading = true;
       })
-      .addCase(logout.rejected, (state) => {
-        // Clear state even if logout fails
+      .addCase(logout.fulfilled, (state) => {
+        state.isLoading = false;
         state.user = null;
         state.isAuthenticated = false;
         state.error = null;
+      })
+      .addCase(logout.rejected, (state, action) => {
         state.isLoading = false;
+        state.error = action.payload as string;
+        // Still clear auth state even if logout fails
+        state.user = null;
+        state.isAuthenticated = false;
       })
       
       // Get current user
-      .addCase(getCurrentUser.fulfilled, (state, action) => {
-        state.user = normalizeUserData(action.payload.user);
-        state.isAuthenticated = true;
-        state.isLoading = false;
+      .addCase(getCurrentUser.pending, (state) => {
+        state.isLoading = true;
+        state.error = null;
       })
-      .addCase(getCurrentUser.rejected, (state) => {
-        // Don't clear user data on getCurrentUser failure
-        // Keep the user logged in if they have valid tokens
+      .addCase(getCurrentUser.fulfilled, (state, action) => {
         state.isLoading = false;
-        console.log('getCurrentUser rejected, but keeping user logged in');
+        state.user = action.payload;
+        state.isAuthenticated = true;
+        state.error = null;
+      })
+      .addCase(getCurrentUser.rejected, (state, action) => {
+        state.isLoading = false;
+        state.error = action.payload as string;
+        state.isAuthenticated = false;
+        state.user = null;
+      })
+      
+      // Set user
+      .addCase(setUser.fulfilled, (state, action) => {
+        state.user = action.payload;
+        state.isAuthenticated = true;
       });
   },
 });
 
-export const { clearError, setUser } = authSlice.actions;
+export const { clearError, clearAuth } = authSlice.actions;
 export default authSlice.reducer;
 
+// Ensure this file is treated as a module
+export {};

@@ -186,7 +186,7 @@ const ButtonGroup = styled.div`
   justify-content: center;
 `;
 
-const Button = styled.button<{ variant?: 'primary' | 'secondary' }>`
+const Button = styled.button<{ $variant?: 'primary' | 'secondary' }>`
   padding: 0.75rem 1.5rem;
   border: none;
   border-radius: 8px;
@@ -194,7 +194,7 @@ const Button = styled.button<{ variant?: 'primary' | 'secondary' }>`
   cursor: pointer;
   transition: all 0.2s ease;
   
-  ${props => props.variant === 'primary' ? `
+  ${props => props.$variant === 'primary' ? `
     background: #f44336;
     color: white;
     
@@ -270,10 +270,10 @@ const Navbar: React.FC = () => {
               Are you sure you want to logout? You'll need to sign in again to access your account.
             </DialogMessage>
             <ButtonGroup>
-              <Button variant="secondary" onClick={cancelLogout} disabled={isLoggingOut}>
+              <Button $variant="secondary" onClick={cancelLogout} disabled={isLoggingOut}>
                 Cancel
               </Button>
-              <Button variant="primary" onClick={handleLogout} disabled={isLoggingOut}>
+              <Button $variant="primary" onClick={handleLogout} disabled={isLoggingOut}>
                 {isLoggingOut ? 'Logging out...' : 'Logout'}
               </Button>
             </ButtonGroup>
