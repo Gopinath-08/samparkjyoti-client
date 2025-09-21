@@ -11,7 +11,6 @@ import {
   faMapMarkerAlt,
   faBriefcase,
   faLeaf,
-  faShoppingCart,
   faBuilding,
   faCheck,
   faArrowRight,
@@ -293,11 +292,6 @@ const LoginLink = styled(Link)`
   }
 `;
 
-const ErrorMessage = styled.div`
-  color: #f44336;
-  font-size: 0.9rem;
-  margin-top: 0.5rem;
-`;
 
 const RegisterPage: React.FC = () => {
   const dispatch = useAppDispatch();

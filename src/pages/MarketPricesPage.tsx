@@ -1,11 +1,9 @@
 import React, { useState } from 'react';
-import { useAuth } from '../contexts/AuthContext';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import {
   faSearch,
   faMapMarkerAlt,
   faFilter,
-  faTruck,
   faChartLine,
   faClock
 } from '@fortawesome/free-solid-svg-icons';
@@ -171,7 +169,6 @@ const MetaItem = styled.div`
 `;
 
 const MarketPricesPage: React.FC = () => {
-  const { user } = useAuth();
   const [searchTerm, setSearchTerm] = useState('');
   const [selectedCategory, setSelectedCategory] = useState('all');
 

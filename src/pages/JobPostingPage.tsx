@@ -1,9 +1,5 @@
-import React, { useState, useEffect } from 'react';
-import { useDispatch } from 'react-redux';
-import { AppDispatch } from '../store/store';
+import React, { useState } from 'react';
 import { jobService } from '../services/jobService';
-import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-import { faBriefcase, faMapMarkerAlt, faRupeeSign, faClock, faUser, faBuilding, faPhone, faEnvelope } from '@fortawesome/free-solid-svg-icons';
 import styled from 'styled-components';
 import toast from 'react-hot-toast';
 
@@ -159,7 +155,6 @@ const Button = styled.button`
 `;
 
 const JobPostingPage: React.FC = () => {
-  const dispatch = useDispatch<AppDispatch>();
   const [formData, setFormData] = useState({
     title: '',
     description: '',

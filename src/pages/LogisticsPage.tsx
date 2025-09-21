@@ -1,5 +1,4 @@
 import React, { useState } from 'react';
-import { useAuth } from '../contexts/AuthContext';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import {
   faTruck,
@@ -177,7 +176,6 @@ const BookButton = styled.button`
 `;
 
 const LogisticsPage: React.FC = () => {
-  const { user } = useAuth();
   const [searchTerm, setSearchTerm] = useState('');
 
   // Transportation providers data (matching React Native app)

@@ -1,5 +1,5 @@
 import api from './api';
-import { normalizeLocation, locationsMatch, filterJobsByLocation } from '../utils/locationMatcher';
+import { normalizeLocation, filterJobsByLocation } from '../utils/locationMatcher';
 
 export interface JobPostingData {
   title: string;

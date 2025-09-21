@@ -1,5 +1,4 @@
-import React, { useState } from 'react';
-import { useAuth } from '../contexts/AuthContext';
+import React from 'react';
 import { getPageSlogan } from '../utils/slogans';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { 
@@ -9,7 +8,6 @@ import {
   faLightbulb, 
   faBookOpen,
   faStar,
-  faComments,
   faShare,
   faPlus
 } from '@fortawesome/free-solid-svg-icons';
@@ -326,8 +324,6 @@ const PrimaryButton = styled.button`
 `;
 
 const UstadPage: React.FC = () => {
-  const { user } = useAuth();
-  const [showShareModal, setShowShareModal] = useState(false);
   const pageSlogan = getPageSlogan('ustad');
 
   const handleShareKnowledge = () => {

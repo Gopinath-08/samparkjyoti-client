@@ -12,8 +12,6 @@ import {
   faClock,
   faStore,
   faTag,
-  faCheckCircle,
-  faStar,
   faBuilding,
   faUser,
   faCalendar
@@ -79,17 +77,6 @@ const MarketName = styled.h2`
   margin: 0 0 1rem 0;
 `;
 
-const VerifiedBadge = styled.span`
-  background: #c6f6d5;
-  color: #22543d;
-  padding: 0.5rem 1rem;
-  border-radius: 20px;
-  font-size: 0.875rem;
-  font-weight: 600;
-  display: inline-flex;
-  align-items: center;
-  gap: 0.5rem;
-`;
 
 const DetailsGrid = styled.div`
   display: grid;

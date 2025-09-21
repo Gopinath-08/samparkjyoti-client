@@ -257,8 +257,6 @@ export function getLocationVariations(location: string): string[] {
  * Find the best matching location from a list
  */
 export function findBestMatch(targetLocation: string, locationList: string[]): string | null {
-  const normalizedTarget = normalizeLocation(targetLocation);
-  
   for (const location of locationList) {
     if (locationsMatch(targetLocation, location)) {
       return location;

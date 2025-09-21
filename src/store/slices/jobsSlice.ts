@@ -1,6 +1,5 @@
 import { createSlice, createAsyncThunk } from '@reduxjs/toolkit';
 import { jobService } from '../../services/jobService';
-import { filterJobsByLocation, normalizeLocation } from '../../utils/locationMatcher';
 
 interface Job {
   id: string;
