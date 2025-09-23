@@ -1,0 +1,298 @@
+:root {
+  /* Primary Color Palette - Core Browns & Earth Tones */
+  --color-saddle-brown: #8B4513;
+  --color-sienna: #A0522D;
+  --color-peru: #CD853F;
+  --color-burlywood: #DEB887;
+
+  /* Neutrals & Creams */
+  --color-beige: #F5F5DC;
+  --color-cornsilk: #FFF8DC;
+  --color-antique-white: #FAEBD7;
+  --color-tan: #D2B48C;
+
+  /* Supporting Colors */
+  --color-sea-green: #2E8B57;
+  --color-warm-orange: #FF6B35;
+  --color-steel-blue: #4682B4;
+  --color-dim-gray: #696969;
+  --color-pure-white: #FFFFFF;
+
+  /* Semantic Color Mappings */
+  --color-primary: var(--color-saddle-brown);
+  --color-secondary: var(--color-peru);
+  --color-success: var(--color-sea-green);
+  --color-warning: var(--color-warm-orange);
+  --color-info: var(--color-steel-blue);
+  --color-text: var(--color-dim-gray);
+  --color-text-light: var(--color-pure-white);
+  --color-background: var(--color-beige);
+  --color-background-light: var(--color-antique-white);
+  --color-card-background: rgba(250, 235, 215, 0.8);
+  --color-border: var(--color-tan);
+
+  /* Pattern Definitions - Enhanced Visibility */
+  --pattern-dots: radial-gradient(circle at 2px 2px, rgba(139, 69, 19, 0.15) 1px, transparent 0);
+  --pattern-grid: linear-gradient(rgba(139, 69, 19, 0.1) 1px, transparent 1px), linear-gradient(90deg, rgba(139, 69, 19, 0.1) 1px, transparent 1px);
+  --pattern-diagonal: repeating-linear-gradient(45deg, transparent, transparent 15px, rgba(139, 69, 19, 0.08) 15px, rgba(139, 69, 19, 0.08) 30px);
+  --pattern-waves: repeating-linear-gradient(90deg, rgba(139, 69, 19, 0.1), rgba(139, 69, 19, 0.1) 15px, transparent 15px, transparent 30px);
+  --pattern-circles: radial-gradient(circle at 25px 25px, rgba(139, 69, 19, 0.12) 3px, transparent 3px);
+  --pattern-hexagons: repeating-conic-gradient(from 0deg at 50% 50%, rgba(139, 69, 19, 0.08) 0deg, transparent 60deg, rgba(139, 69, 19, 0.08) 120deg, transparent 180deg);
+  --pattern-organic: radial-gradient(ellipse at top, rgba(139, 69, 19, 0.06) 0%, transparent 50%), radial-gradient(ellipse at bottom, rgba(160, 82, 45, 0.06) 0%, transparent 50%);
+  --pattern-subtle: repeating-linear-gradient(0deg, transparent, transparent 2px, rgba(139, 69, 19, 0.03) 2px, rgba(139, 69, 19, 0.03) 4px);
+}
+
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+body {
+  font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Oxygen',
+    'Ubuntu', 'Cantarell', 'Fira Sans', 'Droid Sans', 'Helvetica Neue',
+    sans-serif;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  background:
+    var(--pattern-subtle),
+    var(--pattern-dots),
+    var(--pattern-organic),
+    linear-gradient(135deg, var(--color-beige) 0%, var(--color-cornsilk) 100%);
+  background-size: 4px 4px, 25px 25px, 100% 100%, 100% 100%;
+  min-height: 100vh;
+  line-height: 1.6;
+}
+
+code {
+  font-family: 'Fira Code', source-code-pro, Menlo, Monaco, Consolas, 'Courier New',
+    monospace;
+}
+
+.App {
+  min-height: 100vh;
+  background: transparent;
+}
+
+/* Global styles */
+h1,
+h2,
+h3,
+h4,
+h5,
+h6 {
+  font-weight: 600;
+  line-height: 1.2;
+  color: var(--color-saddle-brown);
+}
+
+p {
+  color: var(--color-dim-gray);
+  line-height: 1.6;
+}
+
+/* Button styles */
+button {
+  font-family: inherit;
+  cursor: pointer;
+  border: none;
+  outline: none;
+  transition: all 0.2s ease;
+}
+
+button:disabled {
+  cursor: not-allowed;
+  opacity: 0.6;
+}
+
+/* Input styles */
+input,
+select,
+textarea {
+  font-family: inherit;
+  outline: none;
+  transition: all 0.2s ease;
+}
+
+/* Link styles */
+a {
+  color: inherit;
+  text-decoration: none;
+  transition: color 0.2s ease;
+}
+
+a:hover {
+  color: var(--color-saddle-brown);
+}
+
+/* Card styles */
+.card {
+  background: var(--color-card-background);
+  border-radius: 12px;
+  box-shadow: 0 4px 6px -1px rgba(139, 69, 19, 0.1), 0 2px 4px -1px rgba(139, 69, 19, 0.06);
+  border: 1px solid var(--color-border);
+  transition: all 0.2s ease;
+}
+
+.card:hover {
+  box-shadow: 0 10px 15px -3px rgba(139, 69, 19, 0.15), 0 4px 6px -2px rgba(139, 69, 19, 0.1);
+  transform: translateY(-1px);
+}
+
+/* Animation classes */
+.fade-in {
+  animation: fadeIn 0.3s ease-in;
+}
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.slide-in {
+  animation: slideIn 0.3s ease-out;
+}
+
+@keyframes slideIn {
+  from {
+    opacity: 0;
+    transform: translateX(-20px);
+  }
+
+  to {
+    opacity: 1;
+    transform: translateX(0);
+  }
+}
+
+/* Loading spinner */
+.loading-spinner {
+  display: inline-block;
+  width: 20px;
+  height: 20px;
+  border: 2px solid var(--color-tan);
+  border-top: 2px solid var(--color-saddle-brown);
+  border-radius: 50%;
+  animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+  0% {
+    transform: rotate(0deg);
+  }
+
+  100% {
+    transform: rotate(360deg);
+  }
+}
+
+/* Custom scrollbar */
+::-webkit-scrollbar {
+  width: 8px;
+}
+
+::-webkit-scrollbar-track {
+  background: var(--color-beige);
+}
+
+::-webkit-scrollbar-thumb {
+  background: var(--color-tan);
+  border-radius: 4px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: var(--color-sienna);
+}
+
+/* Utility classes */
+.text-center {
+  text-align: center;
+}
+
+.mb-1 {
+  margin-bottom: 0.25rem;
+}
+
+.mb-2 {
+  margin-bottom: 0.5rem;
+}
+
+.mb-3 {
+  margin-bottom: 0.75rem;
+}
+
+.mb-4 {
+  margin-bottom: 1rem;
+}
+
+.mb-5 {
+  margin-bottom: 1.25rem;
+}
+
+.mt-1 {
+  margin-top: 0.25rem;
+}
+
+.mt-2 {
+  margin-top: 0.5rem;
+}
+
+.mt-3 {
+  margin-top: 0.75rem;
+}
+
+.mt-4 {
+  margin-top: 1rem;
+}
+
+.mt-5 {
+  margin-top: 1.25rem;
+}
+
+.p-1 {
+  padding: 0.25rem;
+}
+
+.p-2 {
+  padding: 0.5rem;
+}
+
+.p-3 {
+  padding: 0.75rem;
+}
+
+.p-4 {
+  padding: 1rem;
+}
+
+.p-5 {
+  padding: 1.25rem;
+}
+
+/* Responsive design */
+@media (max-width: 768px) {
+  .client-website .sidebar {
+    width: 100%;
+    position: fixed;
+    top: 0;
+    left: -100%;
+    height: 100vh;
+    z-index: 1000;
+    transition: left 0.3s ease;
+  }
+
+  .client-website .sidebar.open {
+    left: 0;
+  }
+
+  .client-website .main-content {
+    margin-left: 0;
+  }
+}
