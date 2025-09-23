@@ -176,23 +176,21 @@ const VendorsPage: React.FC = () => {
   }, [fetchVendors]);
 
   useEffect(() => {
-    // Get user location from localStorage or prompt user
+    // Prefer profile location; fallback to saved; then fetch all
+    const profileLocation = user?.location || (user as any)?.district || (user as any)?.state;
     const savedLocation = localStorage.getItem('userLocation');
-    if (savedLocation) {
-      setUserLocation(savedLocation);
-      fetchVendorsByLocation(savedLocation);
-    } else {
-      // Prompt user for location
-      const location = prompt('Please enter your location (e.g., Balangir, Odisha):');
-      if (location) {
-        setUserLocation(location);
-        localStorage.setItem('userLocation', location);
-        fetchVendorsByLocation(location);
-      } else {
-        fetchVendors(); // Fetch all vendors if no location provided
+    const effectiveLocation = profileLocation || savedLocation || '';
+
+    if (effectiveLocation) {
+      setUserLocation(effectiveLocation);
+      if (!savedLocation && profileLocation) {
+        localStorage.setItem('userLocation', effectiveLocation);
       }
+      fetchVendorsByLocation(effectiveLocation);
+    } else {
+      fetchVendors();
     }
-  }, [fetchVendorsByLocation, fetchVendors]);
+  }, [user, fetchVendorsByLocation, fetchVendors]);
 
   // Redirect non-farmers to home page
   if (!isFarmer) {

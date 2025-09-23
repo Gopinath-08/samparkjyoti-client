@@ -47,11 +47,19 @@ const App: React.FC = () => {
                 {/* Farmer-only routes - only accessible if user is farmer */}
                 <Route
                   path="vendors"
-                  element={<VendorsPage />}
+                  element={
+                    <RoleGuard requiredRoles={['farmer']}>
+                      <VendorsPage />
+                    </RoleGuard>
+                  }
                 />
                 <Route
                   path="vendors/:id"
-                  element={<VendorDetailsPage />}
+                  element={
+                    <RoleGuard requiredRoles={['farmer']}>
+                      <VendorDetailsPage />
+                    </RoleGuard>
+                  }
                 />
 
                 <Route
@@ -91,7 +99,7 @@ const App: React.FC = () => {
                 <Route
                   path="logistics"
                   element={
-                    <RoleGuard requiredRoles={['employer']}>
+                    <RoleGuard requiredRoles={['employer', 'farmer', 'buyer']}>
                       <LogisticsPage />
                     </RoleGuard>
                   }

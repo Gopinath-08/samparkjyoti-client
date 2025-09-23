@@ -246,8 +246,8 @@ const HomePage: React.FC = () => {
       color: 'var(--color-saddle-brown)'
     });
 
-    // Vendor access only for farmers
-    if (user && user.primaryRole === 'farmer') {
+    // Vendor access for farmers (including mixed-role users)
+    if (user && (user.primaryRole === 'farmer' || user.roles?.includes('farmer'))) {
       actions.push({
         to: '/vendors',
         icon: 'home',
@@ -257,8 +257,8 @@ const HomePage: React.FC = () => {
       });
     }
 
-    // Market prices for farmers only
-    if (user && user.primaryRole === 'farmer') {
+    // Market prices for farmers (including mixed-role users)
+    if (user && (user.primaryRole === 'farmer' || user.roles?.includes('farmer'))) {
       actions.push({
         to: '/market-prices',
         icon: 'chart-bar',
@@ -279,8 +279,12 @@ const HomePage: React.FC = () => {
       });
     }
 
-    // Logistics action for employers
-    if (userRole === 'employer') {
+    // Logistics action for employer, farmer, buyer (mixed-role allowed)
+    if (user && (
+      user.primaryRole === 'employer' || user.roles?.includes('employer') ||
+      user.primaryRole === 'farmer' || user.roles?.includes('farmer') ||
+      user.primaryRole === 'buyer' || user.roles?.includes('buyer')
+    )) {
       actions.push({
         to: '/logistics',
         icon: 'truck',

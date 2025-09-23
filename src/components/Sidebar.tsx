@@ -159,8 +159,8 @@ const Sidebar: React.FC = () => {
   const getRegularUserNavItems = () => {
     const items = [];
 
-    // Farmer-specific items
-    if (user && user.primaryRole === 'farmer') {
+    // Farmer-specific items (also for mixed-role users that include farmer)
+    if (user && (user.primaryRole === 'farmer' || (Array.isArray(user.roles) && user.roles.includes('farmer')))) {
       items.push({ to: '/vendors', icon: 'home', label: 'Find Vendors', illustration: 'market' });
       items.push({ to: '/market-prices', icon: 'chart-bar', label: 'Market Prices', illustration: 'grain' });
     }

@@ -40,6 +40,8 @@ export interface User {
   email: string;
   phone: string;
   location?: string;
+  district?: string;
+  state?: string;
   roles?: string[];
   primaryRole?: string;
   languages?: string[];
